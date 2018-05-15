@@ -3,7 +3,7 @@ pragma solidity ^0.4.19;
 contract Presale {
     uint constant public cspToMicro = uint(10) ** 18; // 10^18
     uint constant public bonusLevel0 = cspToMicro * 10000 * 100 / 12; // 10000$
-    uint constant public bonusLevel1 = cspToMicro * 50000 * 100 / 12; // 10000$
+    uint constant public bonusLevel1 = cspToMicro * 50000 * 100 / 12; // 50000$
     uint constant public bonusLevel2 = cspToMicro * 100000 * 100 / 12; // 100000$
     uint constant public bonusLevel3 = cspToMicro * 300000 * 100 / 12; // 300000$
     uint constant public bonusLevel4 = cspToMicro * 500000 * 100 / 12; // 500000$
@@ -22,6 +22,8 @@ contract Presale {
         _;
     }
 
+    event Lulkek(uint value);
+
     function Presale() public {
         owner = msg.sender;
     }
@@ -31,11 +33,11 @@ contract Presale {
     mapping (address => uint) public tokens;
     address[] public participants;
 
-    // 100 BTC = ... in dollars
-    uint private btcRate = 0;
+    // 100 000 000 BTC in dollars
+    uint public btcRate = 0;
 
-    // 100 Ether in dollars
-    uint private ethRate = 0;
+    // 100 000 000 Ether in dollars
+    uint public ethRate = 0;
 
     function setETHRate(uint _rate) public onlyOwner {
         ethRate = _rate;
@@ -46,16 +48,18 @@ contract Presale {
     }
 
     function purchaseWithETH(address _to, uint _wei) public whenNotPaused {
-        uint csp = _wei * ethRate / 12;
-        //require(csp >= bonusLevel0);
+        uint csp = _wei * ethRate / (12000000);
+        require(csp >= bonusLevel0);
+
+        owner.transfer(_wei);
 
         csp = addBonus(csp);
         participants.push(_to);
         tokens[_to] += csp;
     }
 
-    function purchaseWithBTC(uint _satoshi, string _btcWallet, address _to) public onlyOwner whenNotPaused {
-        uint csp = _satoshi / (btcRate * 100000000);
+    function purchaseWithBTC(address _to, uint _satoshi) public onlyOwner whenNotPaused {
+        uint csp = _satoshi * btcRate * 10000 / 12;
         require(csp >= bonusLevel0);
 
         csp = addBonus(csp);
