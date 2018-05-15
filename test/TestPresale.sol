@@ -5,9 +5,8 @@ import "truffle/DeployedAddresses.sol";
 import "../contracts/Presale.sol";
 
 contract TestPresale {
-    uint d18 = uint(10) ** 18;
-    function dollarsToMicroCSP(uint _dollars) public returns (uint) {
-        return d18 * _dollars * 100 / 12;
+    function dollarsToMicroCSP(uint _dollars) public pure returns (uint) {
+        return (uint(10) ** 18) * _dollars * 100 / 12;
     }
 
     function testAddBonus() public {

@@ -22,8 +22,6 @@ contract Presale {
         _;
     }
 
-    event Lulkek(uint value);
-
     function Presale() public {
         owner = msg.sender;
     }
@@ -48,10 +46,9 @@ contract Presale {
     }
 
     function purchaseWithETH(address _to, uint _wei) public whenNotPaused {
-        uint csp = _wei * ethRate / (12000000);
+        uint csp = _wei * ethRate / 12000000;
         require(csp >= bonusLevel0);
-
-        owner.transfer(_wei);
+        //owner.transfer(_wei);
 
         csp = addBonus(csp);
         participants.push(_to);
