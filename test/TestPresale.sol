@@ -5,16 +5,39 @@ import "truffle/DeployedAddresses.sol";
 import "../contracts/Presale.sol";
 
 contract TestPresale {
-    function testCSTConversion() public {
-        Presale meta = new Presale();
+    uint d18 = uint(10) ** 18;
+    function dollarsToMicroCSP(uint _dollars) public returns (uint) {
+        return d18 * _dollars * 100 / 12;
+    }
 
-        Assert.equal(meta.calcTokenAmount(9999), 62493, "For purchases less than 10 000$, 1 CST = 0.16$");
-        Assert.equal(meta.calcTokenAmount(10000), 83333, "For purchases between 10 000$ and 100 000$, 1 CST = 0.12$");
-        Assert.equal(meta.calcTokenAmount(99999), 833325, "For purchases between 10 000$ and 100 000$, 1 CST = 0.12$");
-        Assert.equal(meta.calcTokenAmount(100000), 916666, "For purchases between 100 000$ and 300 000$, 1 CST = 0.12$ + 10% CST");
-        Assert.equal(meta.calcTokenAmount(299999), 2749990, "For purchases between 100 000$ and 300 000$, 1 CST = 0.12$ + 10% CST");
-        Assert.equal(meta.calcTokenAmount(300000), 2875000, "For purchases between 300 000$ and 500 000$, 1 CST = 0.12$ + 15% CST");
-        Assert.equal(meta.calcTokenAmount(499999), 4791657, "For purchases between 300 000$ and 500 000$, 1 CST = 0.12$ + 15% CST");
-        Assert.equal(meta.calcTokenAmount(500000), 5000000, "For purchases more or equal than 500 000$, 1 CST = 0.12$ + 20% CST");
+    function testAddBonus() public {
+        Presale meta = new Presale();
+        
+        uint amount = dollarsToMicroCSP(10000);
+        Assert.equal(meta.addBonus(amount), amount, "For purchases between 10 000$ and 50 000$ no bonuses are applied.");
+
+        amount = dollarsToMicroCSP(49999);
+        Assert.equal(meta.addBonus(amount), amount, "For purchases between 10 000$ and 50 000$ no bonuses are applied.");
+
+        amount = dollarsToMicroCSP(50000);
+        Assert.equal(meta.addBonus(amount), amount * 105 / 100, "For purchases between 50 000$ and 100 000$, 5% bonus is applied");
+
+        amount = dollarsToMicroCSP(99999);
+        Assert.equal(meta.addBonus(amount), amount * 105 / 100, "For purchases between 50 000$ and 100 000$, 5% bonus is applied");
+
+        amount = dollarsToMicroCSP(100000);
+        Assert.equal(meta.addBonus(amount), amount * 110 / 100, "For purchases between 100 000$ and 300 000$, 10% bonus is applied");
+
+        amount = dollarsToMicroCSP(299999);
+        Assert.equal(meta.addBonus(amount), amount * 110 / 100, "For purchases between 100 000$ and 300 000$, 10% bonus is applied");
+
+        amount = dollarsToMicroCSP(300000);
+        Assert.equal(meta.addBonus(amount), amount * 115 / 100, "For purchases between 300 000$ and 500 000$, 15% bonus is applied");
+
+        amount = dollarsToMicroCSP(499999);
+        Assert.equal(meta.addBonus(amount), amount * 115 / 100, "For purchases between 300 000$ and 500 000$,  15% bonus is applied");
+
+        amount = dollarsToMicroCSP(500000);
+        Assert.equal(meta.addBonus(amount), amount * 120 / 100, "For purchases more or equal than 500 000$, 20% bonus is applied");
     }
 }
