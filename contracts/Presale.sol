@@ -31,24 +31,23 @@ contract Presale {
     mapping (address => uint) public tokens;
     address[] public participants;
 
-    // 100 000 000 BTC in dollars
-    uint public btcRate = 0;
-
     // 100 000 000 Ether in dollars
     uint public ethRate = 0;
-
     function setETHRate(uint _rate) public onlyOwner {
         ethRate = _rate;
     }
 
+    // 100 000 000 BTC in dollars
+    uint public btcRate = 0;
     function setBTCRate(uint _rate) public onlyOwner {
         btcRate = _rate;
     }
 
-    function purchaseWithETH(address _to, uint _wei) public whenNotPaused {
+    function purchaseWithETH(address _to, uint _wei) payable public whenNotPaused {
         uint csp = _wei * ethRate / 12000000;
         require(csp >= bonusLevel0);
-        //owner.transfer(_wei);
+
+        owner.transfer(_wei);
 
         csp = addBonus(csp);
         participants.push(_to);
