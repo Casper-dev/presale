@@ -12,10 +12,10 @@ contract('Presale', function(accounts) {
             meta = instance;
             return meta.setETHRate();
         })
-        .then(function(){return meta.unpause(rate);})
-        .then(function(){return meta.purchaseWithETH(client, wei, {from:client,value:wei});})
+        .then(function(){return meta.unpause(rate)})
+        .then(function(){return meta.purchaseWithETH(client, wei, {from:client,value:wei})})
         .then(
-            function(r) {assert(false, 'should have failed');},
+            function(r) {assert(false, 'should have failed')},
             function(e) {}
         );
     });
@@ -36,7 +36,7 @@ contract('Presale', function(accounts) {
             ownerBalance = web3.eth.getBalance(owner);
             clientBalance = web3.eth.getBalance(client);
         })
-        .then(function(){return meta.purchaseWithETH(client, wei, {from:client,value:wei});})
+        .then(function(){return meta.purchaseWithETH(client, wei, {from:client,value:wei})})
         .then(function(resp){
             diff = web3.eth.getBalance(owner).sub(ownerBalance).toNumber();
             assert.equal(diff, wei, "owner balance must increase");
@@ -47,4 +47,21 @@ contract('Presale', function(accounts) {
             assert.equal(diff, wei + gasUsed * gasPrice, "client balance must decrease");
         })
     });
+
+    it("should not allow ETH purchases when contract is preSale is paused", function() {
+        var wei = 10 ** 18;
+        var meta;
+        var client = accounts[2];
+
+        return Presale.new()
+        .then(function(instance) {
+            meta = instance;
+            return meta.setETHRate(rate);
+        })
+        .then(function(){return meta.purchaseWithETH(client, wei, {from:client,value:wei})})
+        .then(
+            function(r) {assert(false, "should have failed")},
+            function(e) {}
+        )
+    })
 });
