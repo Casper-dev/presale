@@ -13,7 +13,7 @@ contract('Presale', function(accounts) {
             return meta.setETHRate();
         })
         .then(function(){return meta.unpause(rate)})
-        .then(function(){return meta.purchaseWithETH(client, wei, {from:client,value:wei})})
+        .then(function(){return meta.purchaseWithETH(client, {from:client,value:wei})})
         .then(
             function(r) {assert(false, 'should have failed')},
             function(e) {}
@@ -36,7 +36,7 @@ contract('Presale', function(accounts) {
             ownerBalance = web3.eth.getBalance(owner);
             clientBalance = web3.eth.getBalance(client);
         })
-        .then(function(){return meta.purchaseWithETH(client, wei, {from:client,value:wei})})
+        .then(function(){return meta.purchaseWithETH(client, {from:client,value:wei})})
         .then(function(resp){
             diff = web3.eth.getBalance(owner).sub(ownerBalance).toNumber();
             assert.equal(diff, wei, "owner balance must increase");
@@ -58,7 +58,7 @@ contract('Presale', function(accounts) {
             meta = instance;
             return meta.setETHRate(rate);
         })
-        .then(function(){return meta.purchaseWithETH(client, wei, {from:client,value:wei})})
+        .then(function(){return meta.purchaseWithETH(client, {from:client,value:wei})})
         .then(
             function(r) {assert(false, "should have failed")},
             function(e) {}

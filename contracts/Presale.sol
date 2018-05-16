@@ -43,7 +43,8 @@ contract Presale {
         btcRate = _rate;
     }
 
-    function purchaseWithETH(address _to, uint _wei) payable public whenNotPaused {
+    function purchaseWithETH(address _to) payable public whenNotPaused {
+        uint _wei = msg.value;
         uint csp = _wei * ethRate / 12000000;
         require(csp >= bonusLevel0);
 
