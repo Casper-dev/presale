@@ -51,7 +51,9 @@ contract Presale {
         owner.transfer(_wei);
 
         csp = addBonus(csp);
-        participants.push(_to);
+        if (tokens[_to] == 0) {
+            participants.push(_to);
+        }
         tokens[_to] += csp;
     }
 
@@ -60,7 +62,9 @@ contract Presale {
         require(csp >= bonusLevel0);
 
         csp = addBonus(csp);
-        participants.push(_to);
+        if (tokens[_to] == 0) {
+            participants.push(_to);
+        }
         tokens[_to] += csp;
     }
 
