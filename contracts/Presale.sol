@@ -1,12 +1,15 @@
 pragma solidity ^0.4.19;
 
 contract Presale {
+    uint constant public maxSoldTokens = 238333333 * cspToMicro;
     uint constant public cspToMicro = uint(10) ** 18; // 10^18
     uint constant public bonusLevel0 = cspToMicro * 10000 * 100 / 12; // 10000$
     uint constant public bonusLevel1 = cspToMicro * 50000 * 100 / 12; // 50000$
     uint constant public bonusLevel2 = cspToMicro * 100000 * 100 / 12; // 100000$
     uint constant public bonusLevel3 = cspToMicro * 300000 * 100 / 12; // 300000$
     uint constant public bonusLevel4 = cspToMicro * 500000 * 100 / 12; // 500000$
+
+    uint public soldTokens = 0;
 
     //https://casperproject.atlassian.net/wiki/spaces/PROD/pages/277839878/Smart+contract+ICO
     //Presale date 15.05 - 30.06.2018 
@@ -43,14 +46,24 @@ contract Presale {
         btcRate = _rate;
     }
 
+    function addPersonalBonus(address _to, uint _cspMicro) public onlyOwner {
+        soldTokens += _cspMicro;
+        require(soldTokens <= maxSoldTokens);
+
+        tokens[_to] += _cspMicro;
+    }
+
     function purchaseWithETH(address _to) payable public whenNotPaused {
         uint _wei = msg.value;
         uint csp = _wei * ethRate / 12000000;
         require(csp >= bonusLevel0);
 
+        csp = addBonus(csp);
+        soldTokens += csp;
+        require(soldTokens <= maxSoldTokens);
+
         owner.transfer(_wei);
 
-        csp = addBonus(csp);
         if (tokens[_to] == 0) {
             participants.push(_to);
         }
@@ -62,6 +75,9 @@ contract Presale {
         require(csp >= bonusLevel0);
 
         csp = addBonus(csp);
+        soldTokens += csp;
+        require(soldTokens <= maxSoldTokens);
+
         if (tokens[_to] == 0) {
             participants.push(_to);
         }
