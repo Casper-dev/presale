@@ -97,25 +97,34 @@ contract Pausable is Owned {
     }
 }
 
-contract Presale is ERC20Interface, Pausable {
-    string public constant name = "Csper Presale Token";
-    string public constant symbol = "CPT";
+contract CasperToken is ERC20Interface, Pausable {
+    using SafeMath for uint;
+
+    string public constant name = "Csper Token";
+    string public constant symbol = "CSP";
     uint8 public constant decimals = 18;  // 18 is the most common number of decimal places
 
     uint constant public cspToMicro = uint(10) ** decimals; // 10^18
     uint constant public _totalSupply = 238333333 * cspToMicro;
+
     uint constant public bonusLevel0 = cspToMicro * 10000 * 100 / 12; // 10000$
-    uint constant public bonusLevel1 = cspToMicro * 50000 * 100 / 12; // 50000$
-    uint constant public bonusLevel2 = cspToMicro * 100000 * 100 / 12; // 100000$
-    uint constant public bonusLevel3 = cspToMicro * 300000 * 100 / 12; // 300000$
-    uint constant public bonusLevel4 = cspToMicro * 500000 * 100 / 12; // 500000$
+    uint constant public bonusLevel5 = cspToMicro * 50000 * 100 / 12; // 50000$
+    uint constant public bonusLevel10 = cspToMicro * 100000 * 100 / 12; // 100000$
+    uint constant public bonusLevel15 = cspToMicro * 300000 * 100 / 12; // 300000$
+    uint constant public bonusLevel20 = cspToMicro * 500000 * 100 / 12; // 500000$
+
+    address constant ACSTContract = 0x0;
+    address constant PreICOContract = 0x0;
 
     //https://casperproject.atlassian.net/wiki/spaces/PROD/pages/277839878/Smart+contract+ICO
-    //Presale date 15.05 - 30.06.2018 
-    //uint256 constant startTime = 1526342400; // 15 May 2018 00:00:00 GMT
-    //uint256 constant endTime = 1530403199; // 30 June 2018 23:59:59 GMT
+    // Presale 10.06.2018 - 22.07.2018
+    // Crowd-sale 23.07.2018 - 2.08.2018 (16.08.2018)
+    uint constant presaleStartTime = 0;
+    uint constant crowdsaleStartTime = 0;
+    uint constant crowdsaleEndTime = 0;
+    uint constant crownsaleHardEndTime = 0;
     //address constant CsperWallet = 0x6A5e633065475393211aB623286200910F465d02;
-    function Presale() public {
+    function CasperToken() public {
         balances[owner] = _totalSupply;
         Transfer(address(0), owner, _totalSupply);
     }
@@ -136,8 +145,8 @@ contract Presale is ERC20Interface, Pausable {
         return allowed[tokenOwner][spender];
     }
     function transfer(address to, uint tokens) public returns (bool success) {
-        balances[msg.sender] = SafeMath.sub(balances[msg.sender], tokens);
-        balances[to] = SafeMath.add(balances[to], tokens);
+        balances[msg.sender] = balances[msg.sender].sub(tokens);
+        balances[to] = balances[to].add(tokens);
         Transfer(msg.sender, to, tokens);
         return true;
     }
@@ -147,9 +156,9 @@ contract Presale is ERC20Interface, Pausable {
         return true;
     }
     function transferFrom(address from, address to, uint tokens) public returns (bool success) {
-        balances[from] = SafeMath.sub(balances[from], tokens);
-        allowed[from][msg.sender] = SafeMath.sub(allowed[from][msg.sender], tokens);
-        balances[to] = SafeMath.add(balances[to], tokens);
+        balances[from] = balances[from].sub(tokens);
+        allowed[from][msg.sender] = allowed[from][msg.sender].sub(tokens);
+        balances[to] = balances[to].add(tokens);
         Transfer(from, to, tokens);
         return true;
     }
@@ -172,43 +181,43 @@ contract Presale is ERC20Interface, Pausable {
 
     function purchaseWithETH(address _to) payable public whenNotPaused {
         uint _wei = msg.value;
-        uint csp = SafeMath.mul(_wei, ethRate) / 12000000;
+        uint csp = _wei.mul(ethRate) / 12000000;
         require(csp >= bonusLevel0);
 
-        csp = addBonus(csp);
-
         owner.transfer(_wei);
+        
+        csp = calcBonus(csp);
         if (balanceOf(_to) == 0) {
             participants.push(_to);
         }
-        balances[owner] = SafeMath.sub(balances[owner], csp);
-        balances[_to] = SafeMath.add(balances[_to], csp);
+
+        balances[owner] = balances[owner].sub(csp);
+        balances[_to] = balances[_to].add(csp);
     }
 
     function purchaseWithBTC(address _to, uint _satoshi) public onlyOwner whenNotPaused {
-        uint csp = SafeMath.mul(_satoshi, btcRate * 10000) / 12;
+        uint csp = _satoshi.mul(btcRate.mul(10000)) / 12;
         require(csp >= bonusLevel0);
 
-        csp = addBonus(csp);
-
+        csp = calcBonus(csp);
         if (balanceOf(_to) == 0) {
             participants.push(_to);
         }
-        balances[owner] = SafeMath.sub(balances[owner], csp);
-        balances[_to] = SafeMath.add(balances[_to], csp);
+        balances[owner] = balances[owner].sub(csp);
+        balances[_to] = balances[_to].add(csp);
     }
 
-    function addBonus(uint _csp) public pure returns (uint) {
-        if (_csp < bonusLevel1) {
+    function calcBonus(uint _csp) public pure returns (uint) {
+        if (_csp < bonusLevel5) {
             return _csp;
-        } else if (_csp < bonusLevel2) {
-            return _csp * 105 / 100;
-        } else if (_csp < bonusLevel3) {
-            return _csp * 110 / 100;
-        } else if (_csp < bonusLevel4) {
-            return _csp * 115 / 100;
+        } else if (_csp < bonusLevel10) {
+            return _csp.mul(105).div(100);
+        } else if (_csp < bonusLevel15) {
+            return _csp.mul(110).div(100);
+        } else if (_csp < bonusLevel20) {
+            return _csp.mul(115).div(100);
         } else {
-            return _csp * 120 / 100;
+            return _csp.mul(120).div(100);
         }
     }
 }

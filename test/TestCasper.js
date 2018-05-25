@@ -1,6 +1,6 @@
-var Presale = artifacts.require('Presale')
+var Casper = artifacts.require('CasperToken')
 
-contract('Presale', function (accounts) {
+contract('CasperToken', function (accounts) {
   var owner = accounts[0]
   var rate = 10 ** 12 // 1 ETH == 10^4
 
@@ -8,15 +8,16 @@ contract('Presale', function (accounts) {
     var wei = 10 ** 17
     var meta
     var client = accounts[1]
-    return Presale.new().then(function (instance) {
-      meta = instance
-      return meta.setETHRate()
-    })
-      .then(function () { return meta.unpause(rate) })
+    return Casper.new()
+      .then(function (instance) {
+        meta = instance
+        return meta.setETHRate(rate)
+      })
+      .then(function () { return meta.unpause() })
       .then(function () { return meta.purchaseWithETH(client, {from: client, value: wei}) })
       .then(
         function (r) { assert(false, 'should have failed') },
-        function (e) {}
+        function (e) { }
       )
   })
 
@@ -26,7 +27,7 @@ contract('Presale', function (accounts) {
     var client = accounts[2]
     var ownerBalance, clientBalance
 
-    return Presale.new()
+    return Casper.new()
       .then(function (instance) {
         meta = instance
         return meta.setETHRate(rate)
@@ -53,7 +54,7 @@ contract('Presale', function (accounts) {
     var meta
     var client = accounts[2]
 
-    return Presale.new()
+    return Casper.new()
       .then(function (instance) {
         meta = instance
         return meta.setETHRate(rate)
@@ -68,7 +69,7 @@ contract('Presale', function (accounts) {
   it('only owner should be able to change ETH and BTC rate', function () {
     var notOwner = accounts[1]
 
-    return Presale.new()
+    return Casper.new()
       .then(function (instance) { return instance.setETHRate(rate, {from: notOwner}) })
       .then(
         function (r) { assert(false, 'should have failed') },
