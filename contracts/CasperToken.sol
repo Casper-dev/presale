@@ -105,7 +105,16 @@ contract CasperToken is ERC20Interface, Pausable {
     uint8 public constant decimals = 18;  // 18 is the most common number of decimal places
 
     uint constant public cspToMicro = uint(10) ** decimals; // 10^18
-    uint constant public _totalSupply = 238333333 * cspToMicro;
+    uint constant public _totalSupply    = 440000000 * cspToMicro;
+    uint constant public preICOSupply    = 13000000 * cspToMicro;
+    uint constant public presaleSupply   = 238333333 * cspToMicro;
+    uint constant public crowdsaleSupply = 19750000 * cspToMicro;
+    uint constant public systemSupply    = 35500000 * cspToMicro;
+    uint constant public investorSupply  = 47666667 * cspToMicro;
+    uint constant public teamSupply      = 66000000 * cspToMicro;
+    uint constant public adviserSupply   = 7000000 * cspToMicro;
+    uint constant public bountySupply    = 8800000 * cspToMicro;
+    uint constant public referralSupply  = 3950000 * cspToMicro;
 
     uint constant public bonusLevel0 = cspToMicro * 10000 * 100 / 12; // 10000$
     uint constant public bonusLevel5 = cspToMicro * 50000 * 100 / 12; // 50000$
@@ -119,10 +128,10 @@ contract CasperToken is ERC20Interface, Pausable {
     //https://casperproject.atlassian.net/wiki/spaces/PROD/pages/277839878/Smart+contract+ICO
     // Presale 10.06.2018 - 22.07.2018
     // Crowd-sale 23.07.2018 - 2.08.2018 (16.08.2018)
-    uint constant presaleStartTime = 0;
-    uint constant crowdsaleStartTime = 0;
-    uint constant crowdsaleEndTime = 0;
-    uint constant crownsaleHardEndTime = 0;
+    uint constant public presaleStartTime     = 1528588800;
+    uint constant public crowdsaleStartTime   = 1532304000;
+    uint constant public crowdsaleEndTime     = 1533168000;
+    uint constant public crowdsaleHardEndTime = 1534377600;
     //address constant CsperWallet = 0x6A5e633065475393211aB623286200910F465d02;
     function CasperToken() public {
         balances[owner] = _totalSupply;
@@ -168,7 +177,7 @@ contract CasperToken is ERC20Interface, Pausable {
     uint public ethLastUpdate = 0;
     function setETHRate(uint _rate) public onlyOwner {
         ethRate = _rate;
-        ethLastUpdate = block.timestamp;
+        ethLastUpdate = now;
     }
 
     // 100 000 000 BTC in dollars
@@ -176,26 +185,29 @@ contract CasperToken is ERC20Interface, Pausable {
     uint public btcLastUpdate;
     function setBTCRate(uint _rate) public onlyOwner {
         btcRate = _rate;
-        btcLastUpdate = block.timestamp;
+        btcLastUpdate = now;
     }
 
     function purchaseWithETH(address _to) payable public whenNotPaused {
+        require(now > presaleStartTime);
+
         uint _wei = msg.value;
-        uint csp = _wei.mul(ethRate) / 12000000;
+        uint csp = _wei.mul(ethRate).div(12000000);
         require(csp >= bonusLevel0);
 
         owner.transfer(_wei);
-        
+
         csp = calcBonus(csp);
         if (balanceOf(_to) == 0) {
             participants.push(_to);
         }
-
         balances[owner] = balances[owner].sub(csp);
         balances[_to] = balances[_to].add(csp);
     }
 
     function purchaseWithBTC(address _to, uint _satoshi) public onlyOwner whenNotPaused {
+        require(now > presaleStartTime);
+
         uint csp = _satoshi.mul(btcRate.mul(10000)) / 12;
         require(csp >= bonusLevel0);
 

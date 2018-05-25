@@ -1,5 +1,19 @@
 var Casper = artifacts.require('CasperToken')
 
+const setTime = time => {
+  var ts = web3.eth.getBlock(web3.eth.blockNumber).timestamp
+  return web3.currentProvider.send({
+    jsonrpc: '2.0',
+    method: 'evm_increaseTime',
+    params: [time - ts],
+    id: 0
+  })
+}
+const presaleStart = Date.parse('10 Jun 2018 00:00:00 GMT') / 1000
+const presaleEnd = Date.parse('22 Jul 2018 23:59:59 GMT') / 1000
+const crowdEnd = Date.parse('02 Aug 2018 23:59:59 GMT') / 1000
+const crowdHard = Date.parse('16 Aug 2018 23:59:59 GMT') / 1000
+
 contract('CasperToken', function (accounts) {
   var owner = accounts[0]
   var rate = 10 ** 12 // 1 ETH == 10^4
@@ -9,10 +23,9 @@ contract('CasperToken', function (accounts) {
     var meta
     var client = accounts[1]
     return Casper.new()
-      .then(function (instance) {
-        meta = instance
-        return meta.setETHRate(rate)
-      })
+      .then(function (instance) { meta = instance; return meta })
+      .then(function () { return setTime(presaleStart) })
+      .then(function () { return meta.setETHRate(rate) })
       .then(function () { return meta.unpause() })
       .then(function () { return meta.purchaseWithETH(client, {from: client, value: wei}) })
       .then(
