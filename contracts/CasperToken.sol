@@ -110,7 +110,7 @@ contract CasperToken is ERC20Interface, Owned {
     // Crowd-sale 23.07.2018 - 2.08.2018 (16.08.2018)
     uint constant public presaleStartTime     = 1528588800;
     uint constant public crowdsaleStartTime   = 1532304000;
-    uint constant public crowdsaleEndTime     = 1533168000;
+    uint          public crowdsaleEndTime     = 1533168000;
     uint constant public crowdsaleHardEndTime = 1534377600;
     //address constant CsperWallet = 0x6A5e633065475393211aB623286200910F465d02;
     function CasperToken() public {
@@ -187,6 +187,10 @@ contract CasperToken is ERC20Interface, Owned {
         }
     }
 
+    function prolongCrowdsale() public onlyOwner {
+        crowdsaleEndTime = crowdsaleHardEndTime;
+    }
+
     // 100 000 000 Ether in dollars
     uint public ethRate = 0;
     uint public ethLastUpdate = 0;
@@ -204,7 +208,7 @@ contract CasperToken is ERC20Interface, Owned {
     }
 
     function purchaseWithETH(address _to) payable public {
-        require(now >= presaleStartTime && now <= crowdsaleHardEndTime);
+        require(now >= presaleStartTime && now <= crowdsaleEndTime);
         uint _wei = msg.value;
         uint cst;
 
@@ -239,7 +243,7 @@ contract CasperToken is ERC20Interface, Owned {
     }
 
     function purchaseWithBTC(address _to, uint _satoshi) public onlyOwner {
-        require(now >= presaleStartTime && now <= crowdsaleHardEndTime);
+        require(now >= presaleStartTime && now <= crowdsaleEndTime);
 
         uint cst;
 
@@ -314,7 +318,9 @@ contract CasperToken is ERC20Interface, Owned {
                 balances[to] = balances[to].add(_tokens[j]);
                 Transfer(owner, to, _tokens[j]);
             }
+            airdrop[to].length = 0;
         }
+        airdropList.length = 0;
     }
 
     mapping(address => uint) public whitemap;
