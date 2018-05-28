@@ -13,6 +13,11 @@ const presaleStart = Date.parse('10 Jun 2018 00:00:00 GMT') / 1000
 const presaleEnd = Date.parse('22 Jul 2018 23:59:59 GMT') / 1000
 const crowdEnd = Date.parse('02 Aug 2018 23:59:59 GMT') / 1000
 const crowdHard = Date.parse('16 Aug 2018 23:59:59 GMT') / 1000
+const unlock1 = Date.parse('28 Sep 2018 23:59:59 GMT') / 1000
+const unlock2 = Date.parse('30 Nov 2018 23:59:59 GMT') / 1000
+const unlock3 = Date.parse('31 Jan 2019 23:59:59 GMT') / 1000
+const unlock4 = Date.parse('31 Mar 2019 23:59:59 GMT') / 1000
+const unlock5 = Date.parse('31 May 2019 23:59:59 GMT') / 1000
 
 contract('CasperToken', function (accounts) {
   var owner = accounts[0]
@@ -21,16 +26,21 @@ contract('CasperToken', function (accounts) {
   it('should not allow ETH purchases equivalent to less than 10000$', function () {
     var wei = 10 ** 17
     var meta
+    var last = false
     var client = accounts[1]
     return Casper.new()
       .then(function (instance) { meta = instance; return meta })
       .then(function () { return setTime(presaleStart) })
       .then(function () { return meta.setETHRate(rate) })
-      .then(function () { return meta.unpause() })
-      .then(function () { return meta.purchaseWithETH(client, {from: client, value: wei}) })
+      .then(function () { last = true; return meta.purchaseWithETH(client, {from: client, value: wei}) })
       .then(
         function (r) { assert(false, 'should have failed') },
-        function (e) { }
+        function (e) {
+          if (!last) {
+            console.log(e)
+            assert(false, 'error should occur on last step')
+          };
+        }
       )
   })
 
@@ -45,7 +55,6 @@ contract('CasperToken', function (accounts) {
         meta = instance
         return meta.setETHRate(rate)
       })
-      .then(function () { return meta.unpause() })
       .then(function () {
         ownerBalance = web3.eth.getBalance(owner)
         clientBalance = web3.eth.getBalance(client)
@@ -62,23 +71,6 @@ contract('CasperToken', function (accounts) {
       })
   })
 
-  it('should not allow ETH purchases when contract is preSale is paused', function () {
-    var wei = 10 ** 18
-    var meta
-    var client = accounts[2]
-
-    return Casper.new()
-      .then(function (instance) {
-        meta = instance
-        return meta.setETHRate(rate)
-      })
-      .then(function () { return meta.purchaseWithETH(client, {from: client, value: wei}) })
-      .then(
-        function (r) { assert(false, 'should have failed') },
-        function (e) {}
-      )
-  })
-
   it('only owner should be able to change ETH and BTC rate', function () {
     var notOwner = accounts[1]
 
@@ -88,5 +80,71 @@ contract('CasperToken', function (accounts) {
         function (r) { assert(false, 'should have failed') },
         function (e) {}
       )
+  })
+
+  it('should unfreeze tokens in proper date', function () {
+    var meta
+    var last = false
+    var wei = 10 ** 18 // 1 ETH
+    var from = accounts[1]
+    var to = accounts[2]
+    var balance
+
+    var lastError = function (e) {
+      if (!last) {
+        console.log(e)
+        assert(false, 'error should occur on last step')
+      };
+      last = false
+    }
+
+    return Casper.new()
+      .then(function (instance) {
+        meta = instance
+        return meta.setETHRate(rate)
+      })
+      .then(function () { setTime(presaleStart) })
+      .then(function () { return meta.purchaseWithETH(from, {from: from, value: wei}) })
+      .then(function () { return meta.balanceOf(from) })
+      .then(function (b) { balance = b })
+      .then(function () { setTime(unlock1 - 10) })
+      .then(function () { last = true; return meta.transfer(to, 1) })
+      .then(
+        function (r) { assert(false, 'transfer before 1st unlock should have failed') },
+        lastError
+      )
+      .then(function () { setTime(unlock2 - 10) })
+      .then(function () { return meta.transfer(to, balance.mul(0.2), {from: from}) })
+      .then(function () { last = true; return meta.transfer(to, 2, {from: from}) })
+      .then(
+        function (r) { assert(false, 'transfer of more than unfreezed tokens should have failed') },
+        lastError
+      )
+      .then(function () { setTime(unlock3 - 10) })
+      .then(function () { return meta.transfer(to, balance.mul(0.2), {from: from}) })
+      .then(function () { last = true; return meta.transfer(to, 4, {from: from}) })
+      .then(
+        function (r) { assert(false, 'transfer of more than unfreezed tokens should have failed') },
+        lastError
+      )
+      .then(function () { setTime(unlock4 - 10) })
+      .then(function () { return meta.transfer(to, balance.mul(0.2), {from: from}) })
+      .then(function () { last = true; return meta.transfer(to, 6, {from: from}) })
+      .then(
+        function (r) { assert(false, 'transfer of more than unfreezed tokens should have failed') },
+        lastError
+      )
+      .then(function () { setTime(unlock5 - 10) })
+      .then(function () { return meta.transfer(to, balance.mul(0.2), {from: from}) })
+      .then(function () { last = true; return meta.transfer(to, 8, {from: from}) })
+      .then(
+        function (r) { assert(false, 'transfer of more than unfreezed tokens should have failed') },
+        lastError
+      )
+      .then(function () { setTime(unlock5 + 10) })
+      .then(function () { return meta.balanceOf(from) })
+      .then(function (b) { return meta.transfer(to, b, {from: from}) })
+      .then(function () { return meta.balanceOf(to) })
+      .then(function (b) { assert(b.equals(balance), 'all tokens must be transfered this moment') })
   })
 })

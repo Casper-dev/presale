@@ -68,43 +68,14 @@ contract Owned {
     }
 }
 
-// ----------------------------------------------------------------------------
-// Pausable contract
-// ----------------------------------------------------------------------------
-contract Pausable is Owned {
-    bool public paused;
-
-    function Pausable() public {
-        paused = true;
-    }
-
-    modifier whenNotPaused() {
-        require(!paused);
-        _;
-    }
-
-    modifier whenPaused() {
-        require(paused);
-        _;
-    }
-
-    function pause() onlyOwner whenNotPaused public {
-        paused = true;
-    }
-
-    function unpause() onlyOwner whenPaused public {
-        paused = false;
-    }
-}
-
-contract CasperToken is ERC20Interface, Pausable {
+contract CasperToken is ERC20Interface, Owned {
     using SafeMath for uint;
 
     string public constant name = "Csper Token";
     string public constant symbol = "CSP";
-    uint8 public constant decimals = 18;  // 18 is the most common number of decimal places
+    uint8 public constant decimals = 18;
 
-    uint constant public cspToMicro = uint(10) ** decimals; // 10^18
+    uint constant public cspToMicro = uint(10) ** decimals;
     uint constant public _totalSupply    = 440000000 * cspToMicro;
     uint constant public preICOSupply    = 13000000 * cspToMicro;
     uint constant public presaleSupply   = 238333333 * cspToMicro;
@@ -121,6 +92,12 @@ contract CasperToken is ERC20Interface, Pausable {
     uint constant public bonusLevel10 = cspToMicro * 100000 * 100 / 12; // 100000$
     uint constant public bonusLevel15 = cspToMicro * 300000 * 100 / 12; // 300000$
     uint constant public bonusLevel20 = cspToMicro * 500000 * 100 / 12; // 500000$
+
+    uint constant public unlockDate1 = 1538179199; // 28.09.2018 23:59:59
+    uint constant public unlockDate2 = 1543622399; // 30.11.2018 23:59:59
+    uint constant public unlockDate3 = 1548979199; // 31.01.2019 23:59:59
+    uint constant public unlockDate4 = 1554076799; // 31.03.2019 23:59:59
+    uint constant public unlockDate5 = 1559347199; // 31.05.2019 23:59:59    
 
     address constant ACSTContract = 0x0;
     address constant PreICOContract = 0x0;
@@ -148,6 +125,8 @@ contract CasperToken is ERC20Interface, Pausable {
     mapping(address => mapping(address => uint)) allowed;
     address[] public participants;
 
+    mapping(address => uint) freezed;
+
     function totalSupply() public view returns (uint) {
         return _totalSupply - balances[owner];
     }
@@ -157,7 +136,32 @@ contract CasperToken is ERC20Interface, Pausable {
     function allowance(address tokenOwner, address spender) public view returns (uint remaining) {
         return allowed[tokenOwner][spender];
     }
+
+    function checkTransfer(address from, uint tokens) public {
+        uint newBalance = balances[from].sub(tokens);
+        if (now < unlockDate5) {
+            if (now < unlockDate1) {
+                // all tokens are locked
+                revert();
+            } else if (now < unlockDate2) {
+                // 20% of tokens are unlocked
+                require(newBalance >= freezed[from].mul(80).div(100));
+            } else if (now < unlockDate3) {
+                // 40% of tokens are unlocked
+                require(newBalance >= freezed[from].mul(60).div(100));
+            } else if (now < unlockDate4) {
+                // 60% of tokens are unlocked
+                require(newBalance >= freezed[from].mul(40).div(100));
+            } else {
+                // 80% of tokens are unlocked
+                require(newBalance >= freezed[from].mul(20).div(100));
+            }
+        }
+    }
+
     function transfer(address to, uint tokens) public returns (bool success) {
+        checkTransfer(msg.sender, tokens);
+
         balances[msg.sender] = balances[msg.sender].sub(tokens);
         balances[to] = balances[to].add(tokens);
         Transfer(msg.sender, to, tokens);
@@ -169,6 +173,8 @@ contract CasperToken is ERC20Interface, Pausable {
         return true;
     }
     function transferFrom(address from, address to, uint tokens) public returns (bool success) {
+        checkTransfer(from, tokens);
+
         balances[from] = balances[from].sub(tokens);
         allowed[from][msg.sender] = allowed[from][msg.sender].sub(tokens);
         balances[to] = balances[to].add(tokens);
@@ -192,7 +198,7 @@ contract CasperToken is ERC20Interface, Pausable {
         btcLastUpdate = now;
     }
 
-    function purchaseWithETH(address _to) payable public whenNotPaused {
+    function purchaseWithETH(address _to) payable public {
         require(now >= presaleStartTime && now <= crowdsaleHardEndTime);
         uint _wei = msg.value;
         uint csp;
@@ -215,9 +221,10 @@ contract CasperToken is ERC20Interface, Pausable {
         }
         balances[owner] = balances[owner].sub(csp);
         balances[_to] = balances[_to].add(csp);
+        freezed[_to] = balances[_to];
     }
 
-    function purchaseWithBTC(address _to, uint _satoshi) public onlyOwner whenNotPaused {
+    function purchaseWithBTC(address _to, uint _satoshi) public onlyOwner {
         require(now >= presaleStartTime && now <= crowdsaleHardEndTime);
 
         uint csp;
@@ -238,6 +245,7 @@ contract CasperToken is ERC20Interface, Pausable {
         }
         balances[owner] = balances[owner].sub(csp);
         balances[_to] = balances[_to].add(csp);
+        freezed[_to] = balances[_to];
     }
 
     // calculate bonus for presale
