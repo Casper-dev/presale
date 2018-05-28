@@ -221,14 +221,7 @@ contract CasperToken is ERC20Interface, Owned {
             crowdsaleSold = crowdsaleSold.add(cst);
             require(crowdsaleSold <= crowdsaleSupply);
 
-            if (now + 3 days < crowdsaleStartTime) {
-                if (whitemap[_to] >= cst) {
-                    whitemap[_to] -= cst;
-                    whitelistTokens -= cst;
-                } else {
-                    require(crowdsaleSupply >= crowdsaleSold + whitelistTokens + cst);
-                }
-            }
+            updateWhitelist(_to, cst);
         }
 
         assert(cst != 0);
@@ -254,9 +247,16 @@ contract CasperToken is ERC20Interface, Owned {
         if (now < crowdsaleStartTime) {
             cst = _satoshi.mul(btcRate.mul(10000)) / 12; // 1 CST = 0.12 $ on presale
             require(cst >= bonusLevel0.mul(9997).div(10000));
+
             cst = calcBonus(cst);
+            presaleSold = presaleSold.add(cst);
+            require(presaleSold <= presaleSupply);
         } else {
             cst = _satoshi.mul(btcRate.mul(10000)) / 16; // 1 CST = 0.16 $ on presale
+            crowdsaleSold = crowdsaleSold.add(cst);
+            require(crowdsaleSold <= crowdsaleSupply);
+
+            updateWhitelist(_to, cst);
         }
 
         assert(cst != 0);
@@ -268,6 +268,17 @@ contract CasperToken is ERC20Interface, Owned {
         balances[_to] = balances[_to].add(cst);
         freezed[_to] = balances[_to];
         Transfer(owner, _to, cst);
+    }
+
+    function updateWhitelist(address _to, uint _tokens) internal {
+        if (now + 3 days < crowdsaleStartTime) {
+            if (whitemap[_to] >= _tokens) {
+                whitemap[_to] -= _tokens;
+                whitelistTokens -= _tokens;
+            } else {
+                require(crowdsaleSupply >= crowdsaleSold + whitelistTokens + _tokens);
+            }
+        }
     }
 
     // calculate bonus for presale
@@ -323,7 +334,7 @@ contract CasperToken is ERC20Interface, Owned {
         bountyList.push(member);
     }
     // TODO think about gas limit
-    function doBounty() {
+    function doBounty() public onlyOwner {
         uint i;
         uint l = bountyList.length;
         // TODO how many? 
