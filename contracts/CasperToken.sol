@@ -72,26 +72,29 @@ contract CasperToken is ERC20Interface, Owned {
     using SafeMath for uint;
 
     string public constant name = "Csper Token";
-    string public constant symbol = "CSP";
+    string public constant symbol = "CST";
     uint8 public constant decimals = 18;
 
-    uint constant public cspToMicro = uint(10) ** decimals;
-    uint constant public _totalSupply    = 440000000 * cspToMicro;
-    uint constant public preICOSupply    = 13000000 * cspToMicro;
-    uint constant public presaleSupply   = 238333333 * cspToMicro;
-    uint constant public crowdsaleSupply = 19750000 * cspToMicro;
-    uint constant public systemSupply    = 35500000 * cspToMicro;
-    uint constant public investorSupply  = 47666667 * cspToMicro;
-    uint constant public teamSupply      = 66000000 * cspToMicro;
-    uint constant public adviserSupply   = 7000000 * cspToMicro;
-    uint constant public bountySupply    = 8800000 * cspToMicro;
-    uint constant public referralSupply  = 3950000 * cspToMicro;
+    uint constant public cstToMicro = uint(10) ** decimals;
+    uint constant public _totalSupply    = 440000000 * cstToMicro;
+    uint constant public preICOSupply    = 13000000 * cstToMicro;
+    uint constant public presaleSupply   = 238333333 * cstToMicro;
+    uint constant public crowdsaleSupply = 19750000 * cstToMicro;
+    uint constant public systemSupply    = 35500000 * cstToMicro;
+    uint constant public investorSupply  = 47666667 * cstToMicro;
+    uint constant public teamSupply      = 66000000 * cstToMicro;
+    uint constant public adviserSupply   = 7000000 * cstToMicro;
+    uint constant public bountySupply    = 8800000 * cstToMicro;
+    uint constant public referralSupply  = 3950000 * cstToMicro;
 
-    uint constant public bonusLevel0 = cspToMicro * 10000 * 100 / 12; // 10000$
-    uint constant public bonusLevel5 = cspToMicro * 50000 * 100 / 12; // 50000$
-    uint constant public bonusLevel10 = cspToMicro * 100000 * 100 / 12; // 100000$
-    uint constant public bonusLevel15 = cspToMicro * 300000 * 100 / 12; // 300000$
-    uint constant public bonusLevel20 = cspToMicro * 500000 * 100 / 12; // 500000$
+    uint public presaleSold = 0;
+    uint public crowdsaleSold = 0;
+
+    uint constant public bonusLevel0 = cstToMicro * 10000 * 100 / 12; // 10000$
+    uint constant public bonusLevel5 = cstToMicro * 50000 * 100 / 12; // 50000$
+    uint constant public bonusLevel10 = cstToMicro * 100000 * 100 / 12; // 100000$
+    uint constant public bonusLevel15 = cstToMicro * 300000 * 100 / 12; // 300000$
+    uint constant public bonusLevel20 = cstToMicro * 500000 * 100 / 12; // 500000$
 
     uint constant public unlockDate1 = 1538179199; // 28.09.2018 23:59:59
     uint constant public unlockDate2 = 1543622399; // 30.11.2018 23:59:59
@@ -120,7 +123,7 @@ contract CasperToken is ERC20Interface, Owned {
     }
 
     // For every pre-sale participant this mapping stores
-    // amount of 10^-decimals CSP it has.
+    // amount of 10^-decimals CST it has.
     mapping(address => uint) balances;
     mapping(address => mapping(address => uint)) allowed;
     address[] public participants;
@@ -146,6 +149,7 @@ contract CasperToken is ERC20Interface, Owned {
         Transfer(msg.sender, to, tokens);
         return true;
     }
+
     function approve(address spender, uint tokens) public returns (bool success) {
         allowed[msg.sender][spender] = tokens;
         Approval(msg.sender, spender, tokens);
@@ -162,7 +166,7 @@ contract CasperToken is ERC20Interface, Owned {
         return true;
     }
 
-    function checkTransfer(address from, uint newBalance) public {
+    function checkTransfer(address from, uint newBalance) public view {
         if (now < unlockDate5) {
             if (now < unlockDate1) {
                 // all tokens are locked
@@ -202,65 +206,134 @@ contract CasperToken is ERC20Interface, Owned {
     function purchaseWithETH(address _to) payable public {
         require(now >= presaleStartTime && now <= crowdsaleHardEndTime);
         uint _wei = msg.value;
-        uint csp;
+        uint cst;
 
         // accept payment on presale only if it is more than 9997$
         if (now < crowdsaleStartTime) {
-            csp = _wei.mul(ethRate).div(12000000); // 1 CST = 0.12 $ on presale
-            require(csp >= bonusLevel0.mul(9997).div(10000));
-            csp = calcBonus(csp);
+            cst = _wei.mul(ethRate).div(12000000); // 1 CST = 0.12 $ on presale
+            require(cst >= bonusLevel0.mul(9997).div(10000));
+
+            cst = calcBonus(cst);
+            presaleSold = presaleSold.add(cst);
+            require(presaleSold <= presaleSupply);
         } else {
-            csp = _wei.mul(ethRate).div(16000000); // 1 CST = 0.16 $ on crowd-sale
+            cst = _wei.mul(ethRate).div(16000000); // 1 CST = 0.16 $ on crowd-sale
+            crowdsaleSold = crowdsaleSold.add(cst);
+            require(crowdsaleSold <= crowdsaleSupply);
+
+            if (now + 3 days < crowdsaleStartTime) {
+                if (whitemap[_to] >= cst) {
+                    whitemap[_to] -= cst;
+                    whitelistTokens -= cst;
+                } else {
+                    require(crowdsaleSupply >= crowdsaleSold + whitelistTokens + cst);
+                }
+            }
         }
 
-        assert(csp != 0);
+        assert(cst != 0);
 
         owner.transfer(_wei);
 
         if (balanceOf(_to) == 0) {
             participants.push(_to);
         }
-        balances[owner] = balances[owner].sub(csp);
-        balances[_to] = balances[_to].add(csp);
+
+        balances[owner] = balances[owner].sub(cst);
+        balances[_to] = balances[_to].add(cst);
         freezed[_to] = balances[_to];
+        Transfer(owner, _to, cst);
     }
 
     function purchaseWithBTC(address _to, uint _satoshi) public onlyOwner {
         require(now >= presaleStartTime && now <= crowdsaleHardEndTime);
 
-        uint csp;
+        uint cst;
 
          // accept payment on presale only if it is more than 9997$
         if (now < crowdsaleStartTime) {
-            csp = _satoshi.mul(btcRate.mul(10000)) / 12; // 1 CST = 0.12 $ on presale
-            require(csp >= bonusLevel0.mul(9997).div(10000));
-            csp = calcBonus(csp);
+            cst = _satoshi.mul(btcRate.mul(10000)) / 12; // 1 CST = 0.12 $ on presale
+            require(cst >= bonusLevel0.mul(9997).div(10000));
+            cst = calcBonus(cst);
         } else {
-            csp = _satoshi.mul(btcRate.mul(10000)) / 16; // 1 CST = 0.16 $ on presale
+            cst = _satoshi.mul(btcRate.mul(10000)) / 16; // 1 CST = 0.16 $ on presale
         }
 
-        assert(csp != 0);
+        assert(cst != 0);
 
         if (balanceOf(_to) == 0) {
             participants.push(_to);
         }
-        balances[owner] = balances[owner].sub(csp);
-        balances[_to] = balances[_to].add(csp);
+        balances[owner] = balances[owner].sub(cst);
+        balances[_to] = balances[_to].add(cst);
         freezed[_to] = balances[_to];
+        Transfer(owner, _to, cst);
     }
 
     // calculate bonus for presale
-    function calcBonus(uint _csp) public pure returns (uint) {
-        if (_csp < bonusLevel5) {
-            return _csp;
-        } else if (_csp < bonusLevel10) {
-            return _csp.mul(105).div(100);
-        } else if (_csp < bonusLevel15) {
-            return _csp.mul(110).div(100);
-        } else if (_csp < bonusLevel20) {
-            return _csp.mul(115).div(100);
+    function calcBonus(uint _cst) public pure returns (uint) {
+        if (_cst < bonusLevel5) {
+            return _cst;
+        } else if (_cst < bonusLevel10) {
+            return _cst.mul(105).div(100);
+        } else if (_cst < bonusLevel15) {
+            return _cst.mul(110).div(100);
+        } else if (_cst < bonusLevel20) {
+            return _cst.mul(115).div(100);
         } else {
-            return _csp.mul(120).div(100);
+            return _cst.mul(120).div(100);
         }
     }
+
+    mapping(address => uint[]) public airdrop;
+    address[] public airdropList;
+    function addAirdropMember(address member, uint amount) public onlyOwner {
+        // TODO require currentAirdrop + amount < airdropMaxTokens
+        airdropList.push(member);
+        airdrop[member].push(amount);
+    }
+    // TODO think about gas limit
+    function doAirdrop() public onlyOwner {
+        uint i;
+        for(i = 0; i < airdropList.length; i++) {
+            address to = airdropList[i];
+            uint[] memory _tokens = airdrop[to];
+            for(uint j = 0; j < _tokens.length; j++) {
+                balances[owner] = balances[owner].sub(_tokens[j]);
+                balances[to] = balances[to].add(_tokens[j]);
+                Transfer(owner, to, _tokens[j]);
+            }
+        }
+    }
+
+    mapping(address => uint) public whitemap;
+    uint public whitelistTokens = 0;
+    function addWhitelistMember(address member, uint amount) public onlyOwner {
+        whitemap[member] = amount;
+        whitelistTokens.add(amount);
+    }
+
+    address[] public teamList;
+    function addTeamMember(address member) public onlyOwner {
+        teamList.push(member);
+    }
+
+    address[] public bountyList;
+    function addBountylistMember(address member) public onlyOwner {
+        bountyList.push(member);
+    }
+    // TODO think about gas limit
+    function doBounty() {
+        uint i;
+        uint l = bountyList.length;
+        // TODO how many? 
+        uint _tokens = 0 / l;
+        for(i = 0; i < l; i++) {
+            balances[owner] = balances[owner].sub(_tokens);
+            balances[bountyList[i]] = balances[bountyList[i]].add(_tokens);
+            Transfer(owner, bountyList[i], _tokens);
+        }
+    }
+
+    address[] public adviserList;
 }
