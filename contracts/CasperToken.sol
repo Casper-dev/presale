@@ -136,6 +136,10 @@ contract CasperToken is ERC20Interface, Pausable {
     function CasperToken() public {
         balances[owner] = _totalSupply;
         Transfer(address(0), owner, _totalSupply);
+
+        // TODO pre-ICO convertation 1 CSPT -> 10 CST
+
+        // TODO adviser token convertation
     }
 
     // For every pre-sale participant this mapping stores
@@ -189,15 +193,23 @@ contract CasperToken is ERC20Interface, Pausable {
     }
 
     function purchaseWithETH(address _to) payable public whenNotPaused {
-        require(now > presaleStartTime);
-
+        require(now >= presaleStartTime && now <= crowdsaleHardEndTime);
         uint _wei = msg.value;
-        uint csp = _wei.mul(ethRate).div(12000000);
-        require(csp >= bonusLevel0);
+        uint csp;
+
+        // accept payment on presale only if it is more than 9997$
+        if (now < crowdsaleStartTime) {
+            csp = _wei.mul(ethRate).div(12000000); // 1 CST = 0.12 $ on presale
+            require(csp >= bonusLevel0.mul(9997).div(10000));
+            csp = calcBonus(csp);
+        } else {
+            csp = _wei.mul(ethRate).div(16000000); // 1 CST = 0.16 $ on crowd-sale
+        }
+
+        assert(csp != 0);
 
         owner.transfer(_wei);
 
-        csp = calcBonus(csp);
         if (balanceOf(_to) == 0) {
             participants.push(_to);
         }
@@ -206,12 +218,21 @@ contract CasperToken is ERC20Interface, Pausable {
     }
 
     function purchaseWithBTC(address _to, uint _satoshi) public onlyOwner whenNotPaused {
-        require(now > presaleStartTime);
+        require(now >= presaleStartTime && now <= crowdsaleHardEndTime);
 
-        uint csp = _satoshi.mul(btcRate.mul(10000)) / 12;
-        require(csp >= bonusLevel0);
+        uint csp;
 
-        csp = calcBonus(csp);
+         // accept payment on presale only if it is more than 9997$
+        if (now < crowdsaleStartTime) {
+            csp = _satoshi.mul(btcRate.mul(10000)) / 12; // 1 CST = 0.12 $ on presale
+            require(csp >= bonusLevel0.mul(9997).div(10000));
+            csp = calcBonus(csp);
+        } else {
+            csp = _satoshi.mul(btcRate.mul(10000)) / 16; // 1 CST = 0.16 $ on presale
+        }
+
+        assert(csp != 0);
+
         if (balanceOf(_to) == 0) {
             participants.push(_to);
         }
@@ -219,6 +240,7 @@ contract CasperToken is ERC20Interface, Pausable {
         balances[_to] = balances[_to].add(csp);
     }
 
+    // calculate bonus for presale
     function calcBonus(uint _csp) public pure returns (uint) {
         if (_csp < bonusLevel5) {
             return _csp;
