@@ -88,6 +88,9 @@ contract('CasperToken', function (accounts) {
     var wei = 10 ** 18 // 1 ETH
     var from = accounts[1]
     var to = accounts[2]
+    var normal = accounts[3]
+    var slowpoke = accounts[4]
+    var hyperslowpoke = accounts[5]
     var balance
 
     var lastError = function (e) {
@@ -107,6 +110,22 @@ contract('CasperToken', function (accounts) {
       .then(function () { return meta.purchaseWithETH(from, {from: from, value: wei}) })
       .then(function () { return meta.balanceOf(from) })
       .then(function (b) { balance = b })
+      .then(function () { setTime(presaleEnd + 10) })
+      .then(function () { return meta.purchaseWithETH(normal, {from: normal, value: wei}) })
+      .then(function () { setTime(crowdEnd + 10) })
+      .then(function () { last = true; return meta.purchaseWithETH(slowpoke, {from: slowpoke, value: wei}) })
+      .then(
+        function (r) { assert(false, 'slowpoke should be unable to purchase after end of crowd-sale') },
+        lastError
+      )
+      .then(function () { return meta.prolongCrowdsale() })
+      .then(function () { return meta.purchaseWithETH(slowpoke, {from: slowpoke, value: wei}) })
+      .then(function () { setTime(crowdHard + 10) })
+      .then(function () { last = true; return meta.purchaseWithETH(hyperslowpoke, {from: hyperslowpoke, value: wei}) })
+      .then(
+        function (r) { assert(false, 'hyperslowpoke should be unable to purchase after hard-end of crowd-sale') },
+        lastError
+      )
       .then(function () { setTime(unlock1 - 10) })
       .then(function () { last = true; return meta.transfer(to, 1) })
       .then(
