@@ -137,8 +137,32 @@ contract CasperToken is ERC20Interface, Owned {
         return allowed[tokenOwner][spender];
     }
 
-    function checkTransfer(address from, uint tokens) public {
+    function transfer(address to, uint tokens) public returns (bool success) {
+        uint newBalance = balances[msg.sender].sub(tokens);
+        checkTransfer(msg.sender, newBalance);
+
+        balances[msg.sender] = newBalance;
+        balances[to] = balances[to].add(tokens);
+        Transfer(msg.sender, to, tokens);
+        return true;
+    }
+    function approve(address spender, uint tokens) public returns (bool success) {
+        allowed[msg.sender][spender] = tokens;
+        Approval(msg.sender, spender, tokens);
+        return true;
+    }
+    function transferFrom(address from, address to, uint tokens) public returns (bool success) {
         uint newBalance = balances[from].sub(tokens);
+        checkTransfer(from, newBalance);
+
+        balances[from] = newBalance;
+        allowed[from][msg.sender] = allowed[from][msg.sender].sub(tokens);
+        balances[to] = balances[to].add(tokens);
+        Transfer(from, to, tokens);
+        return true;
+    }
+
+    function checkTransfer(address from, uint newBalance) public {
         if (now < unlockDate5) {
             if (now < unlockDate1) {
                 // all tokens are locked
@@ -157,29 +181,6 @@ contract CasperToken is ERC20Interface, Owned {
                 require(newBalance >= freezed[from].mul(20).div(100));
             }
         }
-    }
-
-    function transfer(address to, uint tokens) public returns (bool success) {
-        checkTransfer(msg.sender, tokens);
-
-        balances[msg.sender] = balances[msg.sender].sub(tokens);
-        balances[to] = balances[to].add(tokens);
-        Transfer(msg.sender, to, tokens);
-        return true;
-    }
-    function approve(address spender, uint tokens) public returns (bool success) {
-        allowed[msg.sender][spender] = tokens;
-        Approval(msg.sender, spender, tokens);
-        return true;
-    }
-    function transferFrom(address from, address to, uint tokens) public returns (bool success) {
-        checkTransfer(from, tokens);
-
-        balances[from] = balances[from].sub(tokens);
-        allowed[from][msg.sender] = allowed[from][msg.sender].sub(tokens);
-        balances[to] = balances[to].add(tokens);
-        Transfer(from, to, tokens);
-        return true;
     }
 
     // 100 000 000 Ether in dollars
