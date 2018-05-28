@@ -82,6 +82,9 @@ contract('CasperToken', function (accounts) {
       )
   })
 
+  // this test is so big, because evm_increaseTime operates on VM state,
+  // not contract and we do not want to impose any particular order on test execution.
+  // So this test goes through all stage of ICO at once.
   it('should unfreeze tokens in proper date', function () {
     var meta
     var last = false
