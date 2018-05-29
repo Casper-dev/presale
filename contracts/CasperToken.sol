@@ -118,8 +118,18 @@ contract CasperToken is ERC20Interface, Owned {
         Transfer(address(0), owner, _totalSupply);
 
         // TODO pre-ICO convertation 1 CSPT -> 10 CST
+        allowed[owner][0x0] = 10 * 0;
 
         // TODO adviser token convertation
+        approve(0x096ad02a48338cb9ea967a96062842891d195af5, 833333333333333333334);
+
+        // TODO team allocations
+        allowed[owner][0x0] = 123;
+    }
+
+    mapping(address => bool) public kyc;
+    function kycPassed(address _mem) public onlyOwner {
+        kyc[_mem] = true;
     }
 
     // For every pre-sale participant this mapping stores
@@ -167,7 +177,7 @@ contract CasperToken is ERC20Interface, Owned {
     }
 
     function checkTransfer(address from, uint newBalance) public view {
-        if (now < unlockDate5) {
+        if (now < unlockDate5 && from != owner) {
             if (now < unlockDate1) {
                 // all tokens are locked
                 revert();
@@ -300,34 +310,38 @@ contract CasperToken is ERC20Interface, Owned {
         }
     }
 
-    mapping(address => uint[]) public airdrop;
+    mapping(address => uint) public airdropMap;
     address[] public airdropList;
     function addAirdropMember(address member, uint amount) public onlyOwner {
         // TODO require currentAirdrop + amount < airdropMaxTokens
-        airdropList.push(member);
-        airdrop[member].push(amount);
+        if (airdropMap[member] == 0) {
+            airdropList.push(member);
+        }
+        airdropMap[member] = airdropMap[member].add(amount);
     }
     // TODO think about gas limit
     function doAirdrop() public onlyOwner {
         uint i;
         for(i = 0; i < airdropList.length; i++) {
             address to = airdropList[i];
-            uint[] memory _tokens = airdrop[to];
-            for(uint j = 0; j < _tokens.length; j++) {
-                balances[owner] = balances[owner].sub(_tokens[j]);
-                balances[to] = balances[to].add(_tokens[j]);
-                Transfer(owner, to, _tokens[j]);
-            }
-            airdrop[to].length = 0;
+            uint _tokens = airdropMap[to];
+            balances[owner] = balances[owner].sub(_tokens);
+            balances[to] = balances[to].add(_tokens);
+            Transfer(owner, to, _tokens);
+            delete airdropMap[to];
         }
         airdropList.length = 0;
     }
 
     mapping(address => uint) public whitemap;
     uint public whitelistTokens = 0;
-    function addWhitelistMember(address member, uint amount) public onlyOwner {
-        whitemap[member] = amount;
-        whitelistTokens.add(amount);
+    address[] public whiteList;
+    function addWhitelistMember(address _mem, uint _tokens) public {
+        if (whitemap[_mem] == 0) {
+            whiteList.push(_mem);
+        }
+        whitemap[_mem] = _tokens;
+        whitelistTokens.add(_tokens);
     }
 
     address[] public teamList;
@@ -335,22 +349,38 @@ contract CasperToken is ERC20Interface, Owned {
         teamList.push(member);
     }
 
+    mapping(address => uint) public bountyMap;
+    uint public bountySold = 0;
     address[] public bountyList;
-    function addBountylistMember(address member) public onlyOwner {
-        bountyList.push(member);
+    function addBountylistMember(address _mem, uint _tokens) public onlyOwner {
+        if (bountyMap[_mem] == 0) {
+            bountyList.push(_mem);
+        }
+        bountyMap[_mem] = bountyMap[_mem].add(_tokens);
+        bountySold.add(_tokens);
+        require(bountySold <= bountySupply);
     }
     // TODO think about gas limit
     function doBounty() public onlyOwner {
         uint i;
-        uint l = bountyList.length;
-        // TODO how many? 
-        uint _tokens = 0 / l;
-        for(i = 0; i < l; i++) {
+        for(i = 0; i < bountyList.length; i++) {
+            address to = bountyList[i];
+            uint _tokens = bountyMap[to];
             balances[owner] = balances[owner].sub(_tokens);
-            balances[bountyList[i]] = balances[bountyList[i]].add(_tokens);
-            Transfer(owner, bountyList[i], _tokens);
+            balances[to] = balances[to].add(_tokens);
+            Transfer(owner, to, _tokens);
         }
     }
 
+    mapping(address => uint) public adviserMap;
+    uint public adviserSold = 0;
     address[] public adviserList;
+    function addAdviser(address _adv, uint _tokens) public onlyOwner {
+        if (adviserMap[_adv] == 0) {
+            adviserList.push(_adv);
+        }
+        adviserMap[_adv] = adviserMap[_adv].add(_tokens);
+        adviserSold.add(_tokens);
+        require(adviserSold <= adviserSupply);
+    }
 }
