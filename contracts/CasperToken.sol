@@ -56,16 +56,6 @@ contract Owned {
         require(msg.sender == owner);
         _;
     }
-
-    function transferOwnership(address _newOwner) public onlyOwner {
-        newOwner = _newOwner;
-    }
-    function acceptOwnership() public {
-        require(msg.sender == newOwner);
-        OwnershipTransferred(owner, newOwner);
-        owner = newOwner;
-        newOwner = address(0);
-    }
 }
 
 contract CasperToken is ERC20Interface, Owned {
@@ -197,6 +187,24 @@ contract CasperToken is ERC20Interface, Owned {
         }
     }
 
+    function ICOStatus() public view returns (uint, uint, uint) {
+        uint dollars = presaleSold.mul(12).div(100) + crowdsaleSold.mul(16).div(100);
+        return (dollars, 0, 0);
+    }
+
+    function transferBonus(address _to) payable public {
+        uint dollars;
+        (dollars, , ) = ICOStatus();
+        require(dollars > 4800000);
+
+        uint _wei = msg.value;
+        uint cst = _wei.mul(ethRate).div(12000000);
+        presaleSold = presaleSold.add(cst);
+
+        owner.transfer(_wei);
+        _preTransfer(_to, cst);
+    }
+
     function prolongCrowdsale() public onlyOwner {
         crowdsaleEndTime = crowdsaleHardEndTime;
     }
@@ -217,6 +225,35 @@ contract CasperToken is ERC20Interface, Owned {
         btcLastUpdate = now;
     }
 
+    function _sellPresale(uint cst) private {
+        require(cst >= bonusLevel0.mul(9997).div(10000));
+        presaleSold = presaleSold.add(cst);
+        require(presaleSold <= presaleSupply);
+    }
+
+    function _sellCrowd(uint cst, address _to) private {
+        crowdsaleSold = crowdsaleSold.add(cst);
+        require(crowdsaleSold <= crowdsaleSupply);
+        if (now + 3 days < crowdsaleStartTime) {
+            if (whitemap[_to] >= cst) {
+                whitemap[_to] -= cst;
+                whitelistTokens -= cst;
+            } else {
+                require(crowdsaleSupply >= crowdsaleSold + whitelistTokens + cst);
+            }
+        }
+    }
+
+    function _preTransfer(address _to, uint cst) private {
+        if (balanceOf(_to) == 0) {
+            participants.push(_to);
+        }
+        balances[owner] = balances[owner].sub(cst);
+        balances[_to] = balances[_to].add(cst);
+        freezed[_to] = balances[_to];
+        Transfer(owner, _to, cst);
+    }
+
     function purchaseWithETH(address _to) payable public {
         require(now >= presaleStartTime && now <= crowdsaleEndTime);
         uint _wei = msg.value;
@@ -225,32 +262,18 @@ contract CasperToken is ERC20Interface, Owned {
         // accept payment on presale only if it is more than 9997$
         if (now < crowdsaleStartTime) {
             cst = _wei.mul(ethRate).div(12000000); // 1 CST = 0.12 $ on presale
-            require(cst >= bonusLevel0.mul(9997).div(10000));
-
-            presaleSold = presaleSold.add(cst);
-            require(presaleSold <= presaleSupply);
-
+            _sellPresale(cst);
             cst = calcBonus(cst);
         } else {
             cst = _wei.mul(ethRate).div(16000000); // 1 CST = 0.16 $ on crowd-sale
-            crowdsaleSold = crowdsaleSold.add(cst);
-            require(crowdsaleSold <= crowdsaleSupply);
-
-            updateWhitelist(_to, cst);
+            _sellCrowd(cst, _to);
         }
 
         assert(cst != 0);
 
         owner.transfer(_wei);
 
-        if (balanceOf(_to) == 0) {
-            participants.push(_to);
-        }
-
-        balances[owner] = balances[owner].sub(cst);
-        balances[_to] = balances[_to].add(cst);
-        freezed[_to] = balances[_to];
-        Transfer(owner, _to, cst);
+        _preTransfer(_to, cst);
     }
 
     function purchaseWithBTC(address _to, uint _satoshi) public onlyOwner {
@@ -261,40 +284,16 @@ contract CasperToken is ERC20Interface, Owned {
          // accept payment on presale only if it is more than 9997$
         if (now < crowdsaleStartTime) {
             cst = _satoshi.mul(btcRate.mul(10000)) / 12; // 1 CST = 0.12 $ on presale
-            require(cst >= bonusLevel0.mul(9997).div(10000));
-
-            presaleSold = presaleSold.add(cst);
-            require(presaleSold <= presaleSupply);
-
+            _sellPresale(cst);
             cst = calcBonus(cst);
         } else {
             cst = _satoshi.mul(btcRate.mul(10000)) / 16; // 1 CST = 0.16 $ on presale
-            crowdsaleSold = crowdsaleSold.add(cst);
-            require(crowdsaleSold <= crowdsaleSupply);
-
-            updateWhitelist(_to, cst);
+            _sellCrowd(cst, _to);
         }
 
         assert(cst != 0);
 
-        if (balanceOf(_to) == 0) {
-            participants.push(_to);
-        }
-        balances[owner] = balances[owner].sub(cst);
-        balances[_to] = balances[_to].add(cst);
-        freezed[_to] = balances[_to];
-        Transfer(owner, _to, cst);
-    }
-
-    function updateWhitelist(address _to, uint _tokens) internal {
-        if (now + 3 days < crowdsaleStartTime) {
-            if (whitemap[_to] >= _tokens) {
-                whitemap[_to] -= _tokens;
-                whitelistTokens -= _tokens;
-            } else {
-                require(crowdsaleSupply >= crowdsaleSold + whitelistTokens + _tokens);
-            }
-        }
+        _preTransfer(_to, cst);
     }
 
     // calculate bonus for presale
