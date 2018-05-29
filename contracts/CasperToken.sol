@@ -79,6 +79,7 @@ contract CasperToken is ERC20Interface, Owned {
 
     uint public presaleSold = 0;
     uint public crowdsaleSold = 0;
+    uint public ethSold = 0;
 
     uint constant public bonusLevel0 = cstToMicro * 10000 * 100 / 12; // 10000$
     uint constant public bonusLevel5 = cstToMicro * 50000 * 100 / 12; // 50000$
@@ -187,9 +188,9 @@ contract CasperToken is ERC20Interface, Owned {
         }
     }
 
-    function ICOStatus() public view returns (uint, uint, uint) {
-        uint dollars = presaleSold.mul(12).div(100) + crowdsaleSold.mul(16).div(100);
-        return (dollars, 0, 0);
+    function ICOStatus() public view returns (uint usd, uint eth, uint cst) {
+        usd = presaleSold.mul(12).div(100) + crowdsaleSold.mul(16).div(100);
+        return (usd, ethSold, presaleSold + crowdsaleSold);
     }
 
     function transferBonus(address _to) payable public {
@@ -198,6 +199,9 @@ contract CasperToken is ERC20Interface, Owned {
         require(dollars > 4800000);
 
         uint _wei = msg.value;
+
+        ethSold += _wei;
+
         uint cst = _wei.mul(ethRate).div(12000000);
         presaleSold = presaleSold.add(cst);
 
@@ -265,6 +269,8 @@ contract CasperToken is ERC20Interface, Owned {
         uint _wei = msg.value;
         uint cst;
 
+        ethSold += _wei;
+
         // accept payment on presale only if it is more than 9997$
         if (now < crowdsaleStartTime) {
             cst = _wei.mul(ethRate).div(12000000); // 1 CST = 0.12 $ on presale
@@ -282,11 +288,12 @@ contract CasperToken is ERC20Interface, Owned {
         _preTransfer(_to, cst);
     }
 
-    function purchaseWithBTC(address _to, uint _satoshi) public onlyOwner {
+    function purchaseWithBTC(address _to, uint _satoshi, uint _wei) public onlyOwner {
         require(now >= presaleStartTime && now <= crowdsaleEndTime);
 
-        uint cst;
+        ethSold += _wei;
 
+        uint cst;
          // accept payment on presale only if it is more than 9997$
         if (now < crowdsaleStartTime) {
             cst = _satoshi.mul(btcRate.mul(10000)) / 12; // 1 CST = 0.12 $ on presale
