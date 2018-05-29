@@ -244,6 +244,12 @@ contract CasperToken is ERC20Interface, Owned {
         }
     }
 
+    function addInvestorBonus(address _to, uint8 p) public {
+        require(p > 0 && p <= 5);
+        uint bonus = balances[_to].mul(p).div(100);
+        _preTransfer(_to, bonus);
+    }
+
     function _preTransfer(address _to, uint cst) private {
         if (balanceOf(_to) == 0) {
             participants.push(_to);
