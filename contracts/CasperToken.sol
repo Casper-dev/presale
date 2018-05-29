@@ -118,13 +118,13 @@ contract CasperToken is ERC20Interface, Owned {
         Transfer(address(0), owner, _totalSupply);
 
         // TODO pre-ICO convertation 1 CSPT -> 10 CST
-        allowed[owner][0x0] = 10 * 0;
+        //allowed[owner][0x0] = 10 * 0;
 
         // TODO adviser token convertation
-        approve(0x096ad02a48338cb9ea967a96062842891d195af5, 833333333333333333334);
+        //approve(0x096ad02a48338CB9eA967a96062842891D195Af5, 833333333333333333334);
 
         // TODO team allocations
-        allowed[owner][0x0] = 123;
+        //allowed[owner][0x0] = 123;
     }
 
     mapping(address => bool) public kyc;
@@ -227,9 +227,10 @@ contract CasperToken is ERC20Interface, Owned {
             cst = _wei.mul(ethRate).div(12000000); // 1 CST = 0.12 $ on presale
             require(cst >= bonusLevel0.mul(9997).div(10000));
 
-            cst = calcBonus(cst);
             presaleSold = presaleSold.add(cst);
             require(presaleSold <= presaleSupply);
+
+            cst = calcBonus(cst);
         } else {
             cst = _wei.mul(ethRate).div(16000000); // 1 CST = 0.16 $ on crowd-sale
             crowdsaleSold = crowdsaleSold.add(cst);
@@ -262,9 +263,10 @@ contract CasperToken is ERC20Interface, Owned {
             cst = _satoshi.mul(btcRate.mul(10000)) / 12; // 1 CST = 0.12 $ on presale
             require(cst >= bonusLevel0.mul(9997).div(10000));
 
-            cst = calcBonus(cst);
             presaleSold = presaleSold.add(cst);
             require(presaleSold <= presaleSupply);
+
+            cst = calcBonus(cst);
         } else {
             cst = _satoshi.mul(btcRate.mul(10000)) / 16; // 1 CST = 0.16 $ on presale
             crowdsaleSold = crowdsaleSold.add(cst);

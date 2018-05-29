@@ -130,7 +130,7 @@ contract('CasperToken', function (accounts) {
         lastError
       )
       .then(function () { setTime(unlock1 - 10) })
-      .then(function () { last = true; return meta.transfer(to, 1) })
+      .then(function () { last = true; return meta.transfer(to, 1, {from: from}) })
       .then(
         function (r) { assert(false, 'transfer before 1st unlock should have failed') },
         lastError
