@@ -10,10 +10,7 @@ function setTime(time) {
   })
 }
 async function error(promise) {
-  return promise.then(
-    data => false,
-    err  => true
-  );
+  return promise.then(data => false, err  => true);
 }
 
 const presaleStart = Date.parse('10 Jun 2018 00:00:00 GMT') / 1000
@@ -38,6 +35,7 @@ contract('CasperToken', function (accounts) {
     const client = accounts[1]
 
     const meta = await Casper.new()
+
     setTime(presaleStart)
     await meta.setETHRate(rate)
     ok = await error(meta.purchaseWithETH(client, {from: client, value: wei}))
@@ -68,6 +66,7 @@ contract('CasperToken', function (accounts) {
   it('only owner should be able to change ETH and BTC rate', async function () {
     const notOwner = accounts[1]
     const meta = await Casper.new()
+
     let ok = await error(meta.setETHRate(rate, {from: notOwner}))
     assert(ok, 'should have failed')
   })
@@ -81,7 +80,7 @@ contract('CasperToken', function (accounts) {
 
     const wei = 10 ** 18 // 1 ETH
     const [, from, from2, to, normal, slowpoke, hyperslowpoke, bigInvestor, air1, air2] = accounts
-    const airCST = web3.toBigNumber(10).pow(18).mul(10) // 10 CST
+    const airCST = web3.toBigNumber(10 ** 18).mul(10) // 10 CST
     const bigInvestorBonus = web3.toBigNumber(4800000)
 
     const meta = await Casper.new()
