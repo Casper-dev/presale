@@ -189,23 +189,19 @@ contract CasperToken is ERC20Interface, Owned {
     }
 
     function ICOStatus() public view returns (uint usd, uint eth, uint cst) {
-        usd = presaleSold.mul(12).div(100) + crowdsaleSold.mul(16).div(100);
+        usd = presaleSold.mul(12).div(10**20) + crowdsaleSold.mul(16).div(10**20);
         return (usd, ethSold, presaleSold + crowdsaleSold);
     }
 
-    function transferBonus(address _to) payable public {
+    function transferBonus(address _to, uint _usd) public {
         uint dollars;
         (dollars, , ) = ICOStatus();
         require(dollars > 4800000);
 
-        uint _wei = msg.value;
-
-        ethSold += _wei;
-
-        uint cst = _wei.mul(ethRate).div(12000000);
+        uint cst = _usd.mul(100).mul(cstToMicro).div(12); // presale tariff
         presaleSold = presaleSold.add(cst);
+        ethSold = ethSold.add(_usd.mul(10**8).div(ethRate));
 
-        owner.transfer(_wei);
         _preTransfer(_to, cst);
     }
 
@@ -324,29 +320,6 @@ contract CasperToken is ERC20Interface, Owned {
         }
     }
 
-    mapping(address => uint) public airdropMap;
-    address[] public airdropList;
-    function addAirdropMember(address member, uint amount) public onlyOwner {
-        // TODO require currentAirdrop + amount < airdropMaxTokens
-        if (airdropMap[member] == 0) {
-            airdropList.push(member);
-        }
-        airdropMap[member] = airdropMap[member].add(amount);
-    }
-    // TODO think about gas limit
-    function doAirdrop() public onlyOwner {
-        uint i;
-        for(i = 0; i < airdropList.length; i++) {
-            address to = airdropList[i];
-            uint _tokens = airdropMap[to];
-            balances[owner] = balances[owner].sub(_tokens);
-            balances[to] = balances[to].add(_tokens);
-            Transfer(owner, to, _tokens);
-            delete airdropMap[to];
-        }
-        airdropList.length = 0;
-    }
-
     mapping(address => uint) public whitemap;
     uint public whitelistTokens = 0;
     address[] public whiteList;
@@ -363,6 +336,29 @@ contract CasperToken is ERC20Interface, Owned {
         teamList.push(member);
     }
 
+    mapping(address => uint) public airdropMap;
+    address[] public airdropList;
+    function addAirdropMember(address _mem, uint amount) public onlyOwner {
+        // TODO require currentAirdrop + amount < airdropMaxTokens
+        if (airdropMap[_mem] == 0) {
+            airdropList.push(_mem);
+        }
+        airdropMap[_mem] = airdropMap[_mem].add(amount);
+    }
+    // TODO think about gas limit
+    function doAirdrop(uint _first) public onlyOwner {
+        uint len = airdropList.length;
+        for(uint i = _first; i < len; i++) {
+            address to = airdropList[i];
+            uint tokens = airdropMap[to];
+            balances[owner] = balances[owner].sub(tokens);
+            balances[to] = balances[to].add(tokens);
+            Transfer(owner, to, tokens);
+            delete airdropMap[to];
+        }
+        airdropList.length = _first;
+    }
+
     mapping(address => uint) public bountyMap;
     uint public bountySold = 0;
     address[] public bountyList;
@@ -374,16 +370,19 @@ contract CasperToken is ERC20Interface, Owned {
         bountySold.add(_tokens);
         require(bountySold <= bountySupply);
     }
+
     // TODO think about gas limit
-    function doBounty() public onlyOwner {
-        uint i;
-        for(i = 0; i < bountyList.length; i++) {
+    function doBounty(uint _first) public onlyOwner {
+        uint len = bountyList.length;
+        for(uint i = _first; i < len; i++) {
             address to = bountyList[i];
-            uint _tokens = bountyMap[to];
-            balances[owner] = balances[owner].sub(_tokens);
-            balances[to] = balances[to].add(_tokens);
-            Transfer(owner, to, _tokens);
+            uint tokens = bountyMap[to];
+            balances[owner] = balances[owner].sub(tokens);
+            balances[to] = balances[to].add(tokens);
+            Transfer(owner, to, tokens);
+            delete bountyMap[to];
         }
+        bountyList.length = _first;
     }
 
     mapping(address => uint) public adviserMap;
