@@ -84,6 +84,7 @@ contract('CasperToken', function (accounts) {
     const bigInvestorBonus = web3.toBigNumber(4800000)
 
     const meta = await Casper.new()
+    await meta.convertPreico()
     await meta.setETHRate(rate)
     setTime(presaleStart)
     await meta.purchaseWithETH(from, {from: from, value: wei})

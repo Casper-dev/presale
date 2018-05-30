@@ -118,6 +118,44 @@ contract CasperToken is ERC20Interface, Owned {
         //allowed[owner][0x0] = 123;
     }
 
+    function convertPreico() public onlyOwner {
+        transfer(0xb424958766e736827Be5A441bA2A54bEeF54fC7C, 10 * 19514560000000000000000);
+        transfer(0xF5dF9C2aAe5118b64Cda30eBb8d85EbE65A03990, 10 * 36084880000000000000000);
+        transfer(0x5D8aCe48970dce4bcD7f985eDb24f5459Ef184Ec, 10 * 2492880000000000000000);
+        transfer(0xcD6d5b09a34562a1ED7857B19b32bED77417655b, 10 * 1660880000000000000000);
+        transfer(0x50f73AC8435E4e500e37FAb8802bcB840bf4b8B8, 10 * 94896880000000000000000);
+        transfer(0x65Aa068590216cb088f4da28190d8815C31aB330, 10 * 16075280000000000000000);
+        transfer(0x2046838D148196a5117C4026E21C165785bD3982, 10 * 5893680000000000000000);
+        transfer(0x458e1f1050C34f5D125437fcEA0Df0aA9212EDa2, 10 * 32772040882120167215360);
+        transfer(0x12B687E19Cef53b2A709e9b98C4d1973850cA53F, 10 * 70956080000000000000000);
+        transfer(0x1Cf5daAB09155aaC1716Aa92937eC1c6D45720c7, 10 * 3948880000000000000000);
+        transfer(0x32fAAdFdC7938E7FbC7386CcF546c5fc382ed094, 10 * 88188880000000000000000);
+        transfer(0xC4eA6C0e9d95d957e75D1EB1Fbe15694CD98336c, 10 * 81948880000000000000000);
+        transfer(0xB97D3d579d35a479c20D28988A459E3F35692B05, 10 * 121680000000000000000);
+        transfer(0x65AD745047633C3402d4BC5382f72EA3A9eCFe47, 10 * 5196880000000000000000);
+        transfer(0xd0BEF2Fb95193f429f0075e442938F5d829a33c8, 10 * 223388880000000000000000);
+        transfer(0x9Fc87C3d44A6374D48b2786C46204F673b0Ae236, 10 * 28284880000000000000000);
+        transfer(0x42C73b8945a82041B06428359a94403a2e882406, 10 * 13080080000000000000000);
+        transfer(0xa4c9595b90BBa7B4d805e555E477200C61711F3a, 10 * 6590480000000000000000);
+        transfer(0xb93b8ceD7CD86a667E12104831b4d514365F9DF8, 10 * 116358235759665569280);
+        //transfer(0xD00D4E40DAFF894961Cf10458FD283c58e12CF4f, 10 * 0);
+        //transfer(0x426043334762056a853e8Cfd8231e72E27Af5Cb7, 10 * 0);
+        transfer(0xa94F999b3f76EB7b2Ba7B17fC37E912Fa2538a87, 10 * 10389600000000000000000);
+        transfer(0xD65B9b98ca08024C3c19868d42C88A3E47D67120, 10 * 25892880000000000000000);
+        transfer(0x3a978a9Cc36f1FE5Aab6D31E41c08d8380ad0ACB, 10 * 548080000000000000000);
+        transfer(0xBD46d909D55d760E2f79C5838c5C42E45c0a853A, 10 * 7526480000000000000000);
+        transfer(0xdD9d289d4699fDa518cf91EaFA029710e3Cbb7AA, 10 * 3324880000000000000000);
+        //transfer(0x6A5e633065475393211aB623286200910F465d02, 10 * 0);
+        transfer(0x8671B362902C3839ae9b4bc099fd24CdeFA026F4, 10 * 21836880000000000000000);
+        transfer(0xf3C25Ee648031B28ADEBDD30c91056c2c5cd9C6b, 10 * 132284880000000000000000);
+        transfer(0x1A2392fB72255eAe19BB626678125A506a93E363, 10 * 61772880000000000000000);
+        //transfer(0x0000000000000000000000000000000000000000, 10 * 0);
+        //transfer(0xd45302EdA0ec8e0d5707a2bfD55f41432377B54d, 10 * 0);
+        transfer(0xCE2cEa425f7635557CFC00E18bc338DdE5B16C9A, 10 * 105360320000000000000000);
+        transfer(0x952AD1a2891506AC442D95DA4C0F1AE70A27b677, 10 * 100252880000000000000000);
+        transfer(0x5eE1fC4D251143Da96db2a5cD61507f2203bf7b7, 10 * 80492880000000000000000);
+    }
+
     mapping(address => bool) public kyc;
     function kycPassed(address _mem) public onlyOwner {
         kyc[_mem] = true;
@@ -141,13 +179,15 @@ contract CasperToken is ERC20Interface, Owned {
         return allowed[tokenOwner][spender];
     }
 
-    function transfer(address to, uint tokens) public returns (bool success) {
-        uint newBalance = balances[msg.sender].sub(tokens);
-        checkTransfer(msg.sender, newBalance);
+    function _transfer(address _from, address _to, uint _tokens) private {
+        balances[_from] = balances[_from].sub(_tokens);
+        balances[_to] = balances[_to].add(_tokens);
+        Transfer(_from, _to, _tokens);
+    }
 
-        balances[msg.sender] = newBalance;
-        balances[to] = balances[to].add(tokens);
-        Transfer(msg.sender, to, tokens);
+    function transfer(address to, uint tokens) public returns (bool success) {
+        checkTransfer(msg.sender, tokens);
+        _transfer(msg.sender, to, tokens);
         return true;
     }
 
@@ -157,17 +197,14 @@ contract CasperToken is ERC20Interface, Owned {
         return true;
     }
     function transferFrom(address from, address to, uint tokens) public returns (bool success) {
-        uint newBalance = balances[from].sub(tokens);
-        checkTransfer(from, newBalance);
-
-        balances[from] = newBalance;
+        checkTransfer(from, tokens);
         allowed[from][msg.sender] = allowed[from][msg.sender].sub(tokens);
-        balances[to] = balances[to].add(tokens);
-        Transfer(from, to, tokens);
+        _transfer(from, to, tokens);
         return true;
     }
 
-    function checkTransfer(address from, uint newBalance) public view {
+    function checkTransfer(address from, uint tokens) public view {
+        uint newBalance = balances[from].sub(tokens);
         if (now < unlockDate5 && from != owner) {
             if (now < unlockDate1) {
                 // all tokens are locked
@@ -254,10 +291,8 @@ contract CasperToken is ERC20Interface, Owned {
         if (balanceOf(_to) == 0) {
             participants.push(_to);
         }
-        balances[owner] = balances[owner].sub(cst);
-        balances[_to] = balances[_to].add(cst);
+        _transfer(owner, _to, cst);
         freezed[_to] = balances[_to];
-        Transfer(owner, _to, cst);
     }
 
     function purchaseWithETH(address _to) payable public {
@@ -351,10 +386,7 @@ contract CasperToken is ERC20Interface, Owned {
         uint len = airdropList.length;
         for(uint i = _first; i < len; i++) {
             address to = airdropList[i];
-            uint tokens = airdropMap[to];
-            balances[owner] = balances[owner].sub(tokens);
-            balances[to] = balances[to].add(tokens);
-            Transfer(owner, to, tokens);
+            _transfer(owner, to, airdropMap[to]);
             delete airdropMap[to];
         }
         airdropList.length = _first;
@@ -377,10 +409,7 @@ contract CasperToken is ERC20Interface, Owned {
         uint len = bountyList.length;
         for(uint i = _first; i < len; i++) {
             address to = bountyList[i];
-            uint tokens = bountyMap[to];
-            balances[owner] = balances[owner].sub(tokens);
-            balances[to] = balances[to].add(tokens);
-            Transfer(owner, to, tokens);
+            _transfer(owner, to, bountyMap[to]);
             delete bountyMap[to];
         }
         bountyList.length = _first;
