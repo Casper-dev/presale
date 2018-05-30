@@ -338,12 +338,13 @@ contract CasperToken is ERC20Interface, Owned {
 
     mapping(address => uint) public airdropMap;
     address[] public airdropList;
-    function addAirdropMember(address _mem, uint amount) public onlyOwner {
-        // TODO require currentAirdrop + amount < airdropMaxTokens
+    function addAirdropMember(address _mem, uint _tokens) public onlyOwner {
         if (airdropMap[_mem] == 0) {
             airdropList.push(_mem);
         }
-        airdropMap[_mem] = airdropMap[_mem].add(amount);
+        airdropMap[_mem] = airdropMap[_mem].add(_tokens);
+        bountySold.add(_tokens);
+        require(bountySold <= bountySupply);
     }
     // TODO think about gas limit
     function doAirdrop(uint _first) public onlyOwner {
