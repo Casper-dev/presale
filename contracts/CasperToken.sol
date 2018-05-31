@@ -211,6 +211,7 @@ contract CasperToken is ERC20Interface, Owned {
     }
 
     function transfer(address to, uint tokens) public returns (bool success) {
+        require(kyc[msg.sender] || msg.sender == owner);
         checkTransfer(msg.sender, tokens);
         _transfer(msg.sender, to, tokens);
         return true;
@@ -222,6 +223,7 @@ contract CasperToken is ERC20Interface, Owned {
         return true;
     }
     function transferFrom(address from, address to, uint tokens) public returns (bool success) {
+        require(kyc[from] || from == owner || msg.sender == owner);
         checkTransfer(from, tokens);
         allowed[from][msg.sender] = allowed[from][msg.sender].sub(tokens);
         _transfer(from, to, tokens);
@@ -324,7 +326,6 @@ contract CasperToken is ERC20Interface, Owned {
 
     function purchaseWithETH(address _to) payable public {
         require(now >= presaleStartTime && now <= crowdsaleEndTime);
-        require(kyc[msg.sender] || msg.sender == owner);
 
         uint _wei = msg.value;
         uint cst;
