@@ -90,7 +90,7 @@ contract CasperToken is ERC20Interface, Owned {
     uint constant public unlockDate1 = 1538179199; // 28.09.2018 23:59:59
     uint constant public unlockDate2 = 1543622399; // 30.11.2018 23:59:59
     uint constant public unlockDate3 = 1548979199; // 31.01.2019 23:59:59
-    uint constant public unlockDate4 = 1554076799; // 31.03.2019 23:59:59
+    uint constant public unlockDate4 = 1553903999; // 29.03.2019 23:59:59
     uint constant public unlockDate5 = 1559347199; // 31.05.2019 23:59:59   
 
     //https://casperproject.atlassian.net/wiki/spaces/PROD/pages/277839878/Smart+contract+ICO
@@ -121,7 +121,11 @@ contract CasperToken is ERC20Interface, Owned {
         admin = _newAdmin;
     }
 
+    bool assignedPreico = false;
     function assignPreicoTokens() public onlyOwner {
+        require(!assignedPreico);
+        assignedPreico = true;
+
         transfer(0xb424958766e736827Be5A441bA2A54bEeF54fC7C, 10 * 19514560000000000000000);
         transfer(0xF5dF9C2aAe5118b64Cda30eBb8d85EbE65A03990, 10 * 36084880000000000000000);
         transfer(0x5D8aCe48970dce4bcD7f985eDb24f5459Ef184Ec, 10 * 2492880000000000000000);
@@ -159,7 +163,11 @@ contract CasperToken is ERC20Interface, Owned {
         transfer(0x5eE1fC4D251143Da96db2a5cD61507f2203bf7b7, 10 * 80492880000000000000000);
     }
 
+    bool assignedTeam = false;
     function assignTeamTokens() public onlyOwner {
+        require(!assignedTeam);
+        assignedTeam = true;
+
         transfer(0xb424958766e736827Be5A441bA2A54bEeF54fC7C, 100 * cstToMicro);
         transfer(0xb424958766e736827Be5A441bA2A54bEeF54fC7C, 100 * cstToMicro);
         transfer(0xb424958766e736827Be5A441bA2A54bEeF54fC7C, 100 * cstToMicro);
@@ -182,7 +190,8 @@ contract CasperToken is ERC20Interface, Owned {
     }
 
     mapping(address => bool) public kyc;
-    function kycPassed(address _mem) public onlyOwner {
+    function kycPassed(address _mem) public {
+        require(msg.sender == owner || msg.sender == admin);
         kyc[_mem] = true;
     }
 
@@ -257,7 +266,7 @@ contract CasperToken is ERC20Interface, Owned {
         return (usd, ethSold, presaleSold + crowdsaleSold);
     }
 
-    function transferBonus(address _to, uint _usd) public {
+    function transferBonus(address _to, uint _usd) public onlyOwner {
         uint dollars;
         (dollars, , ) = ICOStatus();
         require(dollars > 4800000);
@@ -266,7 +275,7 @@ contract CasperToken is ERC20Interface, Owned {
         presaleSold = presaleSold.add(cst);
         ethSold = ethSold.add(_usd.mul(10**8).div(ethRate));
 
-        _preTransfer(_to, cst);
+        _newTransfer(_to, cst);
     }
 
     function prolongCrowdsale() public onlyOwner {
@@ -299,13 +308,13 @@ contract CasperToken is ERC20Interface, Owned {
 
     function _sellCrowd(uint cst, address _to) private {
         crowdsaleSold = crowdsaleSold.add(cst);
-        require(crowdsaleSold <= crowdsaleSupply);
-        if (now + 3 days < crowdsaleStartTime) {
+        require(crowdsaleSold <= crowdsaleSupply.add(presaleSupply).sub(presaleSold));
+        if (now < crowdsaleStartTime + 3 days) {
             if (whitemap[_to] >= cst) {
                 whitemap[_to] -= cst;
                 whitelistTokens -= cst;
             } else {
-                require(crowdsaleSupply >= crowdsaleSold + whitelistTokens + cst);
+                require(crowdsaleSupply.add(presaleSupply).sub(presaleSold) >= crowdsaleSold.add(whitelistTokens).add(cst));
             }
         }
     }
@@ -313,10 +322,10 @@ contract CasperToken is ERC20Interface, Owned {
     function addInvestorBonus(address _to, uint8 p) public {
         require(p > 0 && p <= 5);
         uint bonus = balances[_to].mul(p).div(100);
-        _preTransfer(_to, bonus);
+        _newTransfer(_to, bonus);
     }
 
-    function _preTransfer(address _to, uint cst) private {
+    function _newTransfer(address _to, uint cst) private {
         if (balanceOf(_to) == 0) {
             participants.push(_to);
         }
@@ -346,7 +355,7 @@ contract CasperToken is ERC20Interface, Owned {
 
         owner.transfer(_wei);
 
-        _preTransfer(_to, cst);
+        _newTransfer(_to, cst);
     }
 
     function purchaseWithBTC(address _to, uint _satoshi, uint _wei) public onlyOwner {
@@ -367,7 +376,7 @@ contract CasperToken is ERC20Interface, Owned {
 
         assert(cst != 0);
 
-        _preTransfer(_to, cst);
+        _newTransfer(_to, cst);
     }
 
     // calculate bonus for presale
@@ -399,6 +408,7 @@ contract CasperToken is ERC20Interface, Owned {
     uint public whitelistTokens = 0;
     address[] public whiteList;
     function addWhitelistMember(address _mem, uint _tokens) public {
+        require(msg.sender == admin || msg.sender == owner);
         if (whitemap[_mem] == 0) {
             whiteList.push(_mem);
         }

@@ -20,7 +20,7 @@ const crowdHard = Date.parse('16 Aug 2018 23:59:59 GMT') / 1000
 const unlock1 = Date.parse('28 Sep 2018 23:59:59 GMT') / 1000
 const unlock2 = Date.parse('30 Nov 2018 23:59:59 GMT') / 1000
 const unlock3 = Date.parse('31 Jan 2019 23:59:59 GMT') / 1000
-const unlock4 = Date.parse('31 Mar 2019 23:59:59 GMT') / 1000
+const unlock4 = Date.parse('29 Mar 2019 23:59:59 GMT') / 1000
 const unlock5 = Date.parse('31 May 2019 23:59:59 GMT') / 1000
 
 contract('CasperToken', function (accounts) {
@@ -81,7 +81,7 @@ contract('CasperToken', function (accounts) {
     var last = false
     var balance, ok
 
-    const wei = 10 ** 18 // 1 ETH
+    const wei = 12 * 10 ** 18 // 1 ETH
     const [, from, from2, to, normal, slowpoke, hyperslowpoke, bigInvestor, air1, air2] = accounts
     const airCST = web3.toBigNumber(10 ** 18).mul(10) // 10 CST
     const bigInvestorBonus = web3.toBigNumber(4800000)
@@ -101,7 +101,6 @@ contract('CasperToken', function (accounts) {
     await meta.purchaseWithETH(from2, {from: from2, value: web3.toWei(1, 'ether')})
     await meta.setETHRate(rate)
     await meta.transferBonus(bigInvestor, bigInvestorBonus)
-    balance = await meta.balanceOf(from)
 
     setTime(presaleEnd + 10)
     await meta.purchaseWithETH(normal, {from: normal, value: wei})
@@ -125,25 +124,29 @@ contract('CasperToken', function (accounts) {
     assert(ok, 'transfer before 1st unlock should have failed')
 
     setTime(unlock2 - 10)
-    ok = await error(meta.transfer(to, balance.mul(0.2), {from: from}))
+    ok = await error(meta.transfer(to, 1, {from: from}))
     assert(ok, 'transfer without KYC should have failed ')
     await meta.kycPassed(from);
-    await meta.transfer(to, balance.mul(0.2), {from: from})
+
+    balance = await meta.balanceOf(from)
+
+    let p20 = balance.div(5)
+    await meta.transfer(to, p20, {from: from})
     ok = await error(meta.transfer(to, 2, {from: from}))
     assert(ok, 'transfer of more than unfreezed tokens should have failed')
 
     setTime(unlock3 - 10)
-    await meta.transfer(to, balance.mul(0.2), {from: from})
+    await meta.transfer(to, p20, {from: from})
     ok = await error(meta.transfer(to, 4, {from: from}))
     assert(ok, 'transfer of more than unfreezed tokens should have failed')
 
     setTime(unlock4 - 10)
-    await meta.transfer(to, balance.mul(0.2), {from: from})
+    await meta.transfer(to, p20, {from: from})
     ok = await error(meta.transfer(to, 6, {from: from}))
     assert(ok, 'transfer of more than unfreezed tokens should have failed')
 
     setTime(unlock5 - 10)
-    await meta.transfer(to, balance.mul(0.2), {from: from})
+    await meta.transfer(to, p20, {from: from})
     ok = await error(meta.transfer(to, 8, {from: from}))
     assert(ok, 'transfer of more than unfreezed tokens should have failed')
 
