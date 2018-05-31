@@ -65,12 +65,14 @@ contract('CasperToken', function (accounts) {
     assert(diff.equals(wei + gasUsed * gasPrice), 'client balance must decrease')
   })
 
-  it('only owner should be able to change ETH and BTC rate', async function () {
+  it('only owner or admin should be able to change ETH and BTC rate', async function () {
     const notOwner = accounts[1]
     const meta = await Casper.new()
 
     let ok = await error(meta.setETHRate(rate, {from: notOwner}))
     assert(ok, 'should have failed')
+    await meta.setAdmin(notOwner);
+    await meta.setETHRate(rate, {from: notOwner})
   })
 
   // this test is so big, because evm_increaseTime operates on VM state,
@@ -108,13 +110,8 @@ contract('CasperToken', function (accounts) {
 
     setTime(presaleEnd + 10)
     await meta.kycPassed(normal)
-    await meta.purchaseWithETH(normal, {from: normal, value: wei}) 
-    await meta.kycPassed(air1)
-    await meta.kycPassed(air2)
-    await meta.addAirdropMember(air1, airCST)
-    await meta.addAirdropMember(air2, airCST)
-    await meta.doAirdrop(1)
-    await meta.doAirdrop(0)
+    await meta.purchaseWithETH(normal, {from: normal, value: wei})
+    await meta.doAirdrop([air1, air2], [airCST, airCST])
     assert(airCST.equals(await meta.balanceOf(air1)), "after airdrop balance should increase")
     assert(airCST.equals(await meta.balanceOf(air2)), "after airdrop balance should increase")
 

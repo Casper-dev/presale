@@ -91,10 +91,7 @@ contract CasperToken is ERC20Interface, Owned {
     uint constant public unlockDate2 = 1543622399; // 30.11.2018 23:59:59
     uint constant public unlockDate3 = 1548979199; // 31.01.2019 23:59:59
     uint constant public unlockDate4 = 1554076799; // 31.03.2019 23:59:59
-    uint constant public unlockDate5 = 1559347199; // 31.05.2019 23:59:59    
-
-    address constant ACSTContract = 0x0;
-    address constant PreICOContract = 0x0;
+    uint constant public unlockDate5 = 1559347199; // 31.05.2019 23:59:59   
 
     //https://casperproject.atlassian.net/wiki/spaces/PROD/pages/277839878/Smart+contract+ICO
     // Presale 10.06.2018 - 22.07.2018
@@ -105,6 +102,7 @@ contract CasperToken is ERC20Interface, Owned {
     uint constant public crowdsaleHardEndTime = 1534377600;
     //address constant CsperWallet = 0x6A5e633065475393211aB623286200910F465d02;
     function CasperToken() public {
+        admin = owner;
         balances[owner] = _totalSupply;
         Transfer(address(0), owner, _totalSupply);
 
@@ -116,6 +114,11 @@ contract CasperToken is ERC20Interface, Owned {
 
         // TODO team allocations
         //allowed[owner][0x0] = 123;
+    }
+
+    address admin;
+    function setAdmin(address _newAdmin) public onlyOwner {
+        admin = _newAdmin;
     }
 
     function assignPreicoTokens() public onlyOwner {
@@ -157,25 +160,25 @@ contract CasperToken is ERC20Interface, Owned {
     }
 
     function assignTeamTokens() public onlyOwner {
-        transfer(0xb424958766e736827Be5A441bA2A54bEeF54fC7C, 0);
-        transfer(0xF5dF9C2aAe5118b64Cda30eBb8d85EbE65A03990, 0);
-        transfer(0x5D8aCe48970dce4bcD7f985eDb24f5459Ef184Ec, 0);
-        transfer(0xcD6d5b09a34562a1ED7857B19b32bED77417655b, 0);
-        transfer(0x50f73AC8435E4e500e37FAb8802bcB840bf4b8B8, 0);
-        transfer(0x65Aa068590216cb088f4da28190d8815C31aB330, 0);
-        transfer(0x2046838D148196a5117C4026E21C165785bD3982, 0);
-        transfer(0x458e1f1050C34f5D125437fcEA0Df0aA9212EDa2, 0);
-        transfer(0x12B687E19Cef53b2A709e9b98C4d1973850cA53F, 0);
-        transfer(0x1Cf5daAB09155aaC1716Aa92937eC1c6D45720c7, 0);
-        transfer(0x32fAAdFdC7938E7FbC7386CcF546c5fc382ed094, 0);
-        transfer(0xC4eA6C0e9d95d957e75D1EB1Fbe15694CD98336c, 0);
-        transfer(0xB97D3d579d35a479c20D28988A459E3F35692B05, 0);
-        transfer(0x65AD745047633C3402d4BC5382f72EA3A9eCFe47, 0);
-        transfer(0xd0BEF2Fb95193f429f0075e442938F5d829a33c8, 0);
-        transfer(0x9Fc87C3d44A6374D48b2786C46204F673b0Ae236, 0);
-        transfer(0x42C73b8945a82041B06428359a94403a2e882406, 0);
-        transfer(0xa4c9595b90BBa7B4d805e555E477200C61711F3a, 0);
-        transfer(0xb93b8ceD7CD86a667E12104831b4d514365F9DF8, 0);
+        transfer(0xb424958766e736827Be5A441bA2A54bEeF54fC7C, 100 * cstToMicro);
+        transfer(0xb424958766e736827Be5A441bA2A54bEeF54fC7C, 100 * cstToMicro);
+        transfer(0xb424958766e736827Be5A441bA2A54bEeF54fC7C, 100 * cstToMicro);
+        transfer(0xb424958766e736827Be5A441bA2A54bEeF54fC7C, 100 * cstToMicro);
+        transfer(0xb424958766e736827Be5A441bA2A54bEeF54fC7C, 100 * cstToMicro);
+        transfer(0xb424958766e736827Be5A441bA2A54bEeF54fC7C, 100 * cstToMicro);
+        transfer(0xb424958766e736827Be5A441bA2A54bEeF54fC7C, 100 * cstToMicro);
+        transfer(0xb424958766e736827Be5A441bA2A54bEeF54fC7C, 100 * cstToMicro);
+        transfer(0xb424958766e736827Be5A441bA2A54bEeF54fC7C, 100 * cstToMicro);
+        transfer(0xb424958766e736827Be5A441bA2A54bEeF54fC7C, 100 * cstToMicro);
+        transfer(0xb424958766e736827Be5A441bA2A54bEeF54fC7C, 100 * cstToMicro);
+        transfer(0xb424958766e736827Be5A441bA2A54bEeF54fC7C, 100 * cstToMicro);
+        transfer(0xb424958766e736827Be5A441bA2A54bEeF54fC7C, 100 * cstToMicro);
+        transfer(0xb424958766e736827Be5A441bA2A54bEeF54fC7C, 100 * cstToMicro);
+        transfer(0xb424958766e736827Be5A441bA2A54bEeF54fC7C, 100 * cstToMicro);
+        transfer(0xb424958766e736827Be5A441bA2A54bEeF54fC7C, 100 * cstToMicro);
+        transfer(0xb424958766e736827Be5A441bA2A54bEeF54fC7C, 100 * cstToMicro);
+        transfer(0xb424958766e736827Be5A441bA2A54bEeF54fC7C, 100 * cstToMicro);
+        transfer(0xb424958766e736827Be5A441bA2A54bEeF54fC7C, 100 * cstToMicro);
     }
 
     mapping(address => bool) public kyc;
@@ -271,7 +274,8 @@ contract CasperToken is ERC20Interface, Owned {
     // 100 000 000 Ether in dollars
     uint public ethRate = 0;
     uint public ethLastUpdate = 0;
-    function setETHRate(uint _rate) public onlyOwner {
+    function setETHRate(uint _rate) public {
+        require(msg.sender == admin || msg.sender == owner);
         ethRate = _rate;
         ethLastUpdate = now;
     }
@@ -279,7 +283,8 @@ contract CasperToken is ERC20Interface, Owned {
     // 100 000 000 BTC in dollars
     uint public btcRate = 0;
     uint public btcLastUpdate;
-    function setBTCRate(uint _rate) public onlyOwner {
+    function setBTCRate(uint _rate) public {
+        require(msg.sender == admin || msg.sender == owner);
         btcRate = _rate;
         btcLastUpdate = now;
     }
@@ -379,6 +384,16 @@ contract CasperToken is ERC20Interface, Owned {
         }
     }
 
+    function doAirdrop(address[] members, uint[] tokens) public onlyOwner {
+        require(members.length == tokens.length);
+        uint sold = 0;
+        for(uint i = 0; i < members.length; i++) {
+            _transfer(owner, members[i], tokens[i]);
+            sold = sold.add(tokens[i]);
+        }
+        require(sold < bountySupply);
+    }
+
     mapping(address => uint) public whitemap;
     uint public whitelistTokens = 0;
     address[] public whiteList;
@@ -388,50 +403,6 @@ contract CasperToken is ERC20Interface, Owned {
         }
         whitemap[_mem] = _tokens;
         whitelistTokens.add(_tokens);
-    }
-
-    mapping(address => uint) public airdropMap;
-    address[] public airdropList;
-    function addAirdropMember(address _mem, uint _tokens) public onlyOwner {
-        if (airdropMap[_mem] == 0) {
-            airdropList.push(_mem);
-        }
-        airdropMap[_mem] = airdropMap[_mem].add(_tokens);
-        bountySold.add(_tokens);
-        require(bountySold <= bountySupply);
-    }
-    // TODO think about gas limit
-    function doAirdrop(uint _first) public onlyOwner {
-        uint len = airdropList.length;
-        for(uint i = _first; i < len; i++) {
-            address to = airdropList[i];
-            _transfer(owner, to, airdropMap[to]);
-            delete airdropMap[to];
-        }
-        airdropList.length = _first;
-    }
-
-    mapping(address => uint) public bountyMap;
-    uint public bountySold = 0;
-    address[] public bountyList;
-    function addBountylistMember(address _mem, uint _tokens) public onlyOwner {
-        if (bountyMap[_mem] == 0) {
-            bountyList.push(_mem);
-        }
-        bountyMap[_mem] = bountyMap[_mem].add(_tokens);
-        bountySold.add(_tokens);
-        require(bountySold <= bountySupply);
-    }
-
-    // TODO think about gas limit
-    function doBounty(uint _first) public onlyOwner {
-        uint len = bountyList.length;
-        for(uint i = _first; i < len; i++) {
-            address to = bountyList[i];
-            _transfer(owner, to, bountyMap[to]);
-            delete bountyMap[to];
-        }
-        bountyList.length = _first;
     }
 
     mapping(address => uint) public adviserMap;
@@ -444,5 +415,12 @@ contract CasperToken is ERC20Interface, Owned {
         adviserMap[_adv] = adviserMap[_adv].add(_tokens);
         adviserSold.add(_tokens);
         require(adviserSold <= adviserSupply);
+    }
+
+    function assignAdviserTokens() public onlyOwner {
+        for(uint i = 0; i < adviserList.length; i++) {
+            address _adv = adviserList[i];
+            _transfer(owner, _adv, adviserMap[_adv]);
+        }
     }
 }
