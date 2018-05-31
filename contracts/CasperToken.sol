@@ -118,7 +118,7 @@ contract CasperToken is ERC20Interface, Owned {
         //allowed[owner][0x0] = 123;
     }
 
-    function convertPreico() public onlyOwner {
+    function assignPreicoTokens() public onlyOwner {
         transfer(0xb424958766e736827Be5A441bA2A54bEeF54fC7C, 10 * 19514560000000000000000);
         transfer(0xF5dF9C2aAe5118b64Cda30eBb8d85EbE65A03990, 10 * 36084880000000000000000);
         transfer(0x5D8aCe48970dce4bcD7f985eDb24f5459Ef184Ec, 10 * 2492880000000000000000);
@@ -154,6 +154,28 @@ contract CasperToken is ERC20Interface, Owned {
         transfer(0xCE2cEa425f7635557CFC00E18bc338DdE5B16C9A, 10 * 105360320000000000000000);
         transfer(0x952AD1a2891506AC442D95DA4C0F1AE70A27b677, 10 * 100252880000000000000000);
         transfer(0x5eE1fC4D251143Da96db2a5cD61507f2203bf7b7, 10 * 80492880000000000000000);
+    }
+
+    function assignTeamTokens() public onlyOwner {
+        transfer(0xb424958766e736827Be5A441bA2A54bEeF54fC7C, 0);
+        transfer(0xF5dF9C2aAe5118b64Cda30eBb8d85EbE65A03990, 0);
+        transfer(0x5D8aCe48970dce4bcD7f985eDb24f5459Ef184Ec, 0);
+        transfer(0xcD6d5b09a34562a1ED7857B19b32bED77417655b, 0);
+        transfer(0x50f73AC8435E4e500e37FAb8802bcB840bf4b8B8, 0);
+        transfer(0x65Aa068590216cb088f4da28190d8815C31aB330, 0);
+        transfer(0x2046838D148196a5117C4026E21C165785bD3982, 0);
+        transfer(0x458e1f1050C34f5D125437fcEA0Df0aA9212EDa2, 0);
+        transfer(0x12B687E19Cef53b2A709e9b98C4d1973850cA53F, 0);
+        transfer(0x1Cf5daAB09155aaC1716Aa92937eC1c6D45720c7, 0);
+        transfer(0x32fAAdFdC7938E7FbC7386CcF546c5fc382ed094, 0);
+        transfer(0xC4eA6C0e9d95d957e75D1EB1Fbe15694CD98336c, 0);
+        transfer(0xB97D3d579d35a479c20D28988A459E3F35692B05, 0);
+        transfer(0x65AD745047633C3402d4BC5382f72EA3A9eCFe47, 0);
+        transfer(0xd0BEF2Fb95193f429f0075e442938F5d829a33c8, 0);
+        transfer(0x9Fc87C3d44A6374D48b2786C46204F673b0Ae236, 0);
+        transfer(0x42C73b8945a82041B06428359a94403a2e882406, 0);
+        transfer(0xa4c9595b90BBa7B4d805e555E477200C61711F3a, 0);
+        transfer(0xb93b8ceD7CD86a667E12104831b4d514365F9DF8, 0);
     }
 
     mapping(address => bool) public kyc;
@@ -297,6 +319,8 @@ contract CasperToken is ERC20Interface, Owned {
 
     function purchaseWithETH(address _to) payable public {
         require(now >= presaleStartTime && now <= crowdsaleEndTime);
+        require(kyc[msg.sender] || msg.sender == owner);
+
         uint _wei = msg.value;
         uint cst;
 
@@ -364,11 +388,6 @@ contract CasperToken is ERC20Interface, Owned {
         }
         whitemap[_mem] = _tokens;
         whitelistTokens.add(_tokens);
-    }
-
-    address[] public teamList;
-    function addTeamMember(address member) public onlyOwner {
-        teamList.push(member);
     }
 
     mapping(address => uint) public airdropMap;

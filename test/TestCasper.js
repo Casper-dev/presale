@@ -51,6 +51,8 @@ contract('CasperToken', function (accounts) {
 
     const meta = await Casper.new()
     await meta.setETHRate(rate)
+    await meta.kycPassed(client)
+
     ownerBalance = web3.eth.getBalance(owner)
     clientBalance = web3.eth.getBalance(client)
     resp = await meta.purchaseWithETH(client, {from: client, value: wei})
@@ -84,22 +86,31 @@ contract('CasperToken', function (accounts) {
     const bigInvestorBonus = web3.toBigNumber(4800000)
 
     const meta = await Casper.new()
-    await meta.convertPreico()
+    await meta.assignPreicoTokens()
+    await meta.assignTeamTokens()
     await meta.setETHRate(rate)
     setTime(presaleStart)
+
+    ok = await error(meta.purchaseWithETH(from, {from: from, value: wei}))
+    assert(ok, 'Cant purchase without KYC')
+    await meta.kycPassed(from);
     await meta.purchaseWithETH(from, {from: from, value: wei})
 
     ok = await error(meta.transferBonus(bigInvestor, bigInvestorBonus))
     assert(ok, '4.8M$ purchase should have failed before we collected another 4.8$')
 
     await meta.setETHRate(rate * 1000) // only to send 4.8$ from one account
+    await meta.kycPassed(from2);
     await meta.purchaseWithETH(from2, {from: from2, value: web3.toWei(1, 'ether')})
     await meta.setETHRate(rate)
     await meta.transferBonus(bigInvestor, bigInvestorBonus)
     balance = await meta.balanceOf(from)
 
     setTime(presaleEnd + 10)
+    await meta.kycPassed(normal)
     await meta.purchaseWithETH(normal, {from: normal, value: wei}) 
+    await meta.kycPassed(air1)
+    await meta.kycPassed(air2)
     await meta.addAirdropMember(air1, airCST)
     await meta.addAirdropMember(air2, airCST)
     await meta.doAirdrop(1)
@@ -108,6 +119,7 @@ contract('CasperToken', function (accounts) {
     assert(airCST.equals(await meta.balanceOf(air2)), "after airdrop balance should increase")
 
     setTime(crowdEnd + 10)
+    await meta.kycPassed(slowpoke)
     ok = await error(meta.purchaseWithETH(slowpoke, {from: slowpoke, value: wei}))
     assert(ok, 'slowpoke should be unable to purchase after end of crowd-sale')
 
@@ -115,6 +127,7 @@ contract('CasperToken', function (accounts) {
     await meta.purchaseWithETH(slowpoke, {from: slowpoke, value: wei})
 
     setTime(crowdHard + 10)
+    await meta.kycPassed(hyperslowpoke)
     ok = await error(meta.purchaseWithETH(hyperslowpoke, {from: hyperslowpoke, value: wei}))
     assert(ok, 'hyperslowpoke should be unable to purchase after hard-end of crowd-sale')
 
