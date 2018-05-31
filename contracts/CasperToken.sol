@@ -247,16 +247,16 @@ contract CasperToken is ERC20Interface, Owned {
                 revert();
             } else if (now < unlockDate2) {
                 // 20% of tokens are unlocked
-                require(newBalance >= freezed[from].mul(80).div(100));
+                require(newBalance >= freezed[from].mul(80).div(100).add(airFreezed[from]));
             } else if (now < unlockDate3) {
                 // 40% of tokens are unlocked
-                require(newBalance >= freezed[from].mul(60).div(100));
+                require(newBalance >= freezed[from].mul(60).div(100).add(airFreezed[from]));
             } else if (now < unlockDate4) {
                 // 60% of tokens are unlocked
-                require(newBalance >= freezed[from].mul(40).div(100));
+                require(newBalance >= freezed[from].mul(40).div(100).add(airFreezed[from]));
             } else {
                 // 80% of tokens are unlocked
-                require(newBalance >= freezed[from].mul(20).div(100));
+                require(newBalance >= freezed[from].mul(20).div(100).add(airFreezed[from]));
             }
         }
     }
@@ -394,14 +394,16 @@ contract CasperToken is ERC20Interface, Owned {
         }
     }
 
+    mapping(address => uint) airFreezed;
     function doAirdrop(address[] members, uint[] tokens) public onlyOwner {
         require(members.length == tokens.length);
-        uint sold = 0;
+        uint dropped = 0;
         for(uint i = 0; i < members.length; i++) {
             _transfer(owner, members[i], tokens[i]);
-            sold = sold.add(tokens[i]);
+            airFreezed[members[i]] = airFreezed[members[i]].add(tokens[i]);
+            dropped = dropped.add(tokens[i]);
         }
-        require(sold < bountySupply);
+        require(dropped < bountySupply);
     }
 
     mapping(address => uint) public whitemap;
