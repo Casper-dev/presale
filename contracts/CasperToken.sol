@@ -79,6 +79,7 @@ contract CasperToken is ERC20Interface, Owned {
 
     uint public presaleSold = 0;
     uint public crowdsaleSold = 0;
+    uint public investorGiven = 0;
     uint public ethSold = 0;
 
     uint constant public bonusLevel0 = cstToMicro * 10000 * 100 / 12; // 10000$
@@ -333,10 +334,22 @@ contract CasperToken is ERC20Interface, Owned {
         }
     }
 
-    function addInvestorBonus(address _to, uint8 p) public {
+    function addInvestorBonus(address _to, uint8 p) public onlyOwner {
         require(p > 0 && p <= 5);
         uint bonus = balances[_to].mul(p).div(100);
+
+        investorGiven = investorGiven.add(bonus);
+        require(investorGiven <= investorSupply);
+
         _freezeTransfer(_to, bonus);
+    }
+
+    function addPresaleBonus(address _to, uint tokens) public {
+        require(msg.sender == director || msg.sender == owner);
+        _freezeTransfer(_to, tokens);
+        
+        investorGiven = investorGiven.add(tokens);
+        require(investorGiven <= investorSupply);
     }
 
     function _freezeTransfer(address _to, uint cst) private {
@@ -356,7 +369,7 @@ contract CasperToken is ERC20Interface, Owned {
         if (now < crowdsaleStartTime) {
             cst = _wei.mul(ethRate).div(12000000); // 1 CST = 0.12 $ on presale
             _sellPresale(cst);
-            cst = calcBonus(cst);
+            //cst = calcBonus(cst);
         } else {
             cst = _wei.mul(ethRate).div(16000000); // 1 CST = 0.16 $ on crowd-sale
             _sellCrowd(cst, _to);
@@ -379,7 +392,7 @@ contract CasperToken is ERC20Interface, Owned {
         if (now < crowdsaleStartTime) {
             cst = _satoshi.mul(btcRate.mul(10000)) / 12; // 1 CST = 0.12 $ on presale
             _sellPresale(cst);
-            cst = calcBonus(cst);
+            //cst = calcBonus(cst);
         } else {
             cst = _satoshi.mul(btcRate.mul(10000)) / 16; // 1 CST = 0.16 $ on presale
             _sellCrowd(cst, _to);
