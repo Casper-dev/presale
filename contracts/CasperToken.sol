@@ -121,6 +121,11 @@ contract CasperToken is ERC20Interface, Owned {
         admin = _newAdmin;
     }
 
+    address director;
+    function setDirector(address _newDirector) public onlyOwner {
+        director = _newDirector;
+    }
+
     bool assignedPreico = false;
     function assignPreicoTokens() public onlyOwner {
         require(!assignedPreico);
@@ -199,8 +204,6 @@ contract CasperToken is ERC20Interface, Owned {
     // amount of 10^-decimals CST it has.
     mapping(address => uint) balances;
     mapping(address => mapping(address => uint)) allowed;
-    address[] public participants;
-
     mapping(address => uint) freezed;
 
     function totalSupply() public view returns (uint) {
@@ -263,19 +266,20 @@ contract CasperToken is ERC20Interface, Owned {
 
     function ICOStatus() public view returns (uint usd, uint eth, uint cst) {
         usd = presaleSold.mul(12).div(10**20) + crowdsaleSold.mul(16).div(10**20);
+        usd = usd.add(1040000 * cstToMicro); // pre-ico tokens
         return (usd, ethSold, presaleSold + crowdsaleSold);
     }
 
+    bool bonusTransfered = false;
     function transferBonus(address _to, uint _usd) public onlyOwner {
-        uint dollars;
-        (dollars, , ) = ICOStatus();
-        require(dollars > 4800000);
+        require(!bonusTransfered);
+        bonusTransfered = true;
 
         uint cst = _usd.mul(100).mul(cstToMicro).div(12); // presale tariff
         presaleSold = presaleSold.add(cst);
         ethSold = ethSold.add(_usd.mul(10**8).div(ethRate));
 
-        _newTransfer(_to, cst);
+        _freezeTransfer(_to, cst);
     }
 
     function prolongCrowdsale() public onlyOwner {
@@ -284,20 +288,30 @@ contract CasperToken is ERC20Interface, Owned {
 
     // 100 000 000 Ether in dollars
     uint public ethRate = 0;
+    uint public ethRateMax = 0;
     uint public ethLastUpdate = 0;
     function setETHRate(uint _rate) public {
         require(msg.sender == admin || msg.sender == owner);
+        require(ethRateMax == 0 || ethRate < ethRateMax);
         ethRate = _rate;
         ethLastUpdate = now;
     }
 
     // 100 000 000 BTC in dollars
     uint public btcRate = 0;
+    uint public btcRateMax = 0;
     uint public btcLastUpdate;
     function setBTCRate(uint _rate) public {
         require(msg.sender == admin || msg.sender == owner);
+        require(btcRateMax == 0 || btcRate < btcRateMax);
         btcRate = _rate;
         btcLastUpdate = now;
+    }
+
+    function setMaxRate(uint ethMax, uint btcMax) public {
+        require(msg.sender == director || msg.sender == owner);
+        ethRateMax = ethMax;
+        btcRateMax = btcMax;
     }
 
     function _sellPresale(uint cst) private {
@@ -322,15 +336,12 @@ contract CasperToken is ERC20Interface, Owned {
     function addInvestorBonus(address _to, uint8 p) public {
         require(p > 0 && p <= 5);
         uint bonus = balances[_to].mul(p).div(100);
-        _newTransfer(_to, bonus);
+        _freezeTransfer(_to, bonus);
     }
 
-    function _newTransfer(address _to, uint cst) private {
-        if (balanceOf(_to) == 0) {
-            participants.push(_to);
-        }
+    function _freezeTransfer(address _to, uint cst) private {
         _transfer(owner, _to, cst);
-        freezed[_to] = balances[_to];
+        freezed[_to] = freezed[_to].add(cst);
     }
 
     function purchaseWithETH(address _to) payable public {
@@ -355,7 +366,7 @@ contract CasperToken is ERC20Interface, Owned {
 
         owner.transfer(_wei);
 
-        _newTransfer(_to, cst);
+        _freezeTransfer(_to, cst);
     }
 
     function purchaseWithBTC(address _to, uint _satoshi, uint _wei) public onlyOwner {
@@ -376,7 +387,7 @@ contract CasperToken is ERC20Interface, Owned {
 
         assert(cst != 0);
 
-        _newTransfer(_to, cst);
+        _freezeTransfer(_to, cst);
     }
 
     // calculate bonus for presale
@@ -395,7 +406,8 @@ contract CasperToken is ERC20Interface, Owned {
     }
 
     mapping(address => uint) airFreezed;
-    function doAirdrop(address[] members, uint[] tokens) public onlyOwner {
+    function doAirdrop(address[] members, uint[] tokens) public {
+        require(msg.sender == owner || msg.sender == director);
         require(members.length == tokens.length);
         uint dropped = 0;
         for(uint i = 0; i < members.length; i++) {
@@ -418,22 +430,11 @@ contract CasperToken is ERC20Interface, Owned {
         whitelistTokens.add(_tokens);
     }
 
-    mapping(address => uint) public adviserMap;
     uint public adviserSold = 0;
-    address[] public adviserList;
-    function addAdviser(address _adv, uint _tokens) public onlyOwner {
-        if (adviserMap[_adv] == 0) {
-            adviserList.push(_adv);
-        }
-        adviserMap[_adv] = adviserMap[_adv].add(_tokens);
-        adviserSold.add(_tokens);
+    function transferAdviser(address _adv, uint _tokens) public {
+        require(msg.sender == owner || msg.sender == director);
+        adviserSold = adviserSold.add(_tokens);
         require(adviserSold <= adviserSupply);
-    }
-
-    function assignAdviserTokens() public onlyOwner {
-        for(uint i = 0; i < adviserList.length; i++) {
-            address _adv = adviserList[i];
-            _transfer(owner, _adv, adviserMap[_adv]);
-        }
+        _freezeTransfer(_adv, _tokens);
     }
 }
