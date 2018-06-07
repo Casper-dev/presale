@@ -87,6 +87,9 @@ contract('CasperToken', function (accounts) {
     const bigInvestorBonus = web3.toBigNumber(4800000)
 
     const meta = await Casper.new()
+    
+    // truffle must be run in network with this account
+    // 101e95f9ef90e52adf32930908f01f53d34b1e04c9707d765de77760942d0441
     const vuku = '0xaba41bec8bd59a8c14588c755447fec08aa73c90'
 
     await meta.assignPreicoTokens()
@@ -99,13 +102,16 @@ contract('CasperToken', function (accounts) {
     //ok = await error(meta.transferBonus(bigInvestor, bigInvestorBonus))
     //assert(ok, '4.8M$ purchase should have failed before we collected another 4.8$')
 
+    await meta.purchaseWithPromoter(vukuClient, vuku, {from:vukuClient, value:wei})
+    await meta.kycPassed(vukuClient)
+
+    ok = await error(meta.withdrawPromoter({from:vuku}))
+    assert(ok, "promoters cant withdraw before soft-cap is reached")
+
     await meta.setETHRate(rate * 1000) // only to send 4.8$ from one account
     await meta.purchaseWithETH(from2, {from: from2, value: web3.toWei(1, 'ether')})
     await meta.setETHRate(rate)
     await meta.transferBonus(bigInvestor, bigInvestorBonus)
-
-    await meta.purchaseWithPromoter(vukuClient, vuku, {from:vukuClient, value:wei})
-    await meta.kycPassed(vukuClient)
 
     setTime(presaleEnd + 10)
 

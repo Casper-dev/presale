@@ -29,6 +29,8 @@ contract CasperToken is ERC20Interface, Owned {
     uint public investorGiven = 0;
     uint public ethSold = 0;
 
+    uint constant public softcapUSD = 4800000;
+
     uint constant public bonusLevel0 = cstToMicro * 10000 * 100 / 12; // 10000$
 
     uint constant public unlockDate1 = 1538179199; // 28.09.2018 23:59:59
@@ -318,7 +320,9 @@ contract CasperToken is ERC20Interface, Owned {
 
         uint usd;
         (usd,,) = ICOStatus();
-        require(usd >= 4800000);
+
+        // soft-cap + 5% is closed
+        require(usd >= softcapUSD.mul(105).div(100));
 
         uint bonus = 0;
         address[] memory clients = promoterClients[_to];
