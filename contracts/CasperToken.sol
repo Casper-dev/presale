@@ -84,10 +84,6 @@ contract CasperToken is ERC20Interface, Owned {
     uint public ethSold = 0;
 
     uint constant public bonusLevel0 = cstToMicro * 10000 * 100 / 12; // 10000$
-    uint constant public bonusLevel5 = cstToMicro * 50000 * 100 / 12; // 50000$
-    uint constant public bonusLevel10 = cstToMicro * 100000 * 100 / 12; // 100000$
-    uint constant public bonusLevel15 = cstToMicro * 300000 * 100 / 12; // 300000$
-    uint constant public bonusLevel20 = cstToMicro * 500000 * 100 / 12; // 500000$
 
     uint constant public unlockDate1 = 1538179199; // 28.09.2018 23:59:59
     uint constant public unlockDate2 = 1543622399; // 30.11.2018 23:59:59
@@ -374,7 +370,6 @@ contract CasperToken is ERC20Interface, Owned {
         if (now < crowdsaleStartTime) {
             cst = _wei.mul(ethRate).div(12000000); // 1 CST = 0.12 $ on presale
             _sellPresale(cst);
-            //cst = calcBonus(cst);
         } else {
             cst = _wei.mul(ethRate).div(16000000); // 1 CST = 0.16 $ on crowd-sale
             _sellCrowd(cst, _to);
@@ -397,7 +392,6 @@ contract CasperToken is ERC20Interface, Owned {
         if (now < crowdsaleStartTime) {
             cst = _satoshi.mul(btcRate.mul(10000)) / 12; // 1 CST = 0.12 $ on presale
             _sellPresale(cst);
-            //cst = calcBonus(cst);
         } else {
             cst = _satoshi.mul(btcRate.mul(10000)) / 16; // 1 CST = 0.16 $ on presale
             _sellCrowd(cst, _to);
@@ -406,21 +400,6 @@ contract CasperToken is ERC20Interface, Owned {
         assert(cst != 0);
 
         _freezeTransfer(_to, cst);
-    }
-
-    // calculate bonus for presale
-    function calcBonus(uint _cst) public pure returns (uint) {
-        if (_cst < bonusLevel5) {
-            return _cst;
-        } else if (_cst < bonusLevel10) {
-            return _cst.mul(105).div(100);
-        } else if (_cst < bonusLevel15) {
-            return _cst.mul(110).div(100);
-        } else if (_cst < bonusLevel20) {
-            return _cst.mul(115).div(100);
-        } else {
-            return _cst.mul(120).div(100);
-        }
     }
 
     mapping(address => uint) airFreezed;
