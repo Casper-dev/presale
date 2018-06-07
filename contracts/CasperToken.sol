@@ -336,6 +336,16 @@ contract CasperToken is ERC20Interface, Owned {
         _to.transfer(bonus);
     }
 
+    function cashBack(address _to) public {
+        uint usd;
+        (usd,,) = ICOStatus();
+        require(now > crowdsaleEndTime && usd < softcapUSD);
+        
+        uint eth = 0; // TODO how many ETH was purchased
+
+        _to.transfer(eth);
+    }
+
     function purchaseWithETH(address _to) payable public {
         purchaseWithPromoter(_to, address(0));
     }
