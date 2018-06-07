@@ -68,10 +68,11 @@ contract CasperToken is ERC20Interface, Owned {
     uint constant public cstToMicro = uint(10) ** decimals;
     uint constant public _totalSupply    = 440000000 * cstToMicro;
     uint constant public preICOSupply    = 13000000 * cstToMicro;
-    uint constant public presaleSupply   = 238333333 * cstToMicro;
+    uint constant public presaleSupply   = 183574716 * cstToMicro;
     uint constant public crowdsaleSupply = 19750000 * cstToMicro;
-    uint constant public systemSupply    = 35500000 * cstToMicro;
-    uint constant public investorSupply  = 47666667 * cstToMicro;
+    uint constant public communitySupply = 66000000 * cstToMicro;
+    uint constant public systemSupply    = 35210341 * cstToMicro;
+    uint constant public investorSupply  = 36714943 * cstToMicro;
     uint constant public teamSupply      = 66000000 * cstToMicro;
     uint constant public adviserSupply   = 7000000 * cstToMicro;
     uint constant public bountySupply    = 8800000 * cstToMicro;
