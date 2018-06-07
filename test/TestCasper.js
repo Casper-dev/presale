@@ -52,11 +52,11 @@ contract('CasperToken', function (accounts) {
     const meta = await Casper.new()
     await meta.setETHRate(rate)
 
-    ownerBalance = web3.eth.getBalance(owner)
+    ownerBalance = web3.eth.getBalance(meta.address)
     clientBalance = web3.eth.getBalance(client)
     resp = await meta.purchaseWithETH(client, {from: client, value: wei})
-    diff = web3.eth.getBalance(owner).sub(ownerBalance)
-    assert(diff.equals(wei), 'owner balance must increase')
+    diff = web3.eth.getBalance(meta.address).sub(ownerBalance)
+    assert(diff.equals(wei), 'contract balance must increase')
     
     gasUsed = web3.eth.getTransactionReceipt(resp.tx).cumulativeGasUsed
     gasPrice = web3.eth.getTransaction(resp.tx).gasPrice
@@ -81,12 +81,14 @@ contract('CasperToken', function (accounts) {
     var last = false
     var balance, ok
 
-    const wei = 12 * 10 ** 18 // 1 ETH
-    const [, from, from2, to, normal, slowpoke, hyperslowpoke, bigInvestor, air1, air2] = accounts
+    const wei = web3.toWei(12, 'ether') // 12 ETH
+    const [, from, from2, to, normal, slowpoke, hyperslowpoke, bigInvestor, vukuClient, air1, air2] = accounts
     const airCST = web3.toBigNumber(10 ** 18).mul(10) // 10 CST
     const bigInvestorBonus = web3.toBigNumber(4800000)
 
     const meta = await Casper.new()
+    const vuku = '0xaba41bec8bd59a8c14588c755447fec08aa73c90'
+
     await meta.assignPreicoTokens()
     await meta.assignTeamTokens()
     await meta.setETHRate(rate)
@@ -102,7 +104,21 @@ contract('CasperToken', function (accounts) {
     await meta.setETHRate(rate)
     await meta.transferBonus(bigInvestor, bigInvestorBonus)
 
+    await meta.purchaseWithPromoter(vukuClient, vuku, {from:vukuClient, value:wei})
+    await meta.kycPassed(vukuClient)
+
     setTime(presaleEnd + 10)
+
+    balance = web3.eth.getBalance(vuku)
+    bonus = web3.toBigNumber(wei).mul(5).div(100)
+    resp = await meta.withdrawPromoter({from:vuku})
+
+    gasUsed = web3.eth.getTransactionReceipt(resp.tx).cumulativeGasUsed
+    gasPrice = web3.eth.getTransaction(resp.tx).gasPrice
+    diff = web3.eth.getBalance(vuku).sub(balance)
+    assert(diff.equals(bonus - gasUsed * gasPrice), 'vuku balance must increase properly')
+    
+
     await meta.purchaseWithETH(normal, {from: normal, value: wei})
     await meta.doAirdrop([air1, air2], [airCST, airCST])
     assert(airCST.equals(await meta.balanceOf(air1)), "after airdrop balance should increase")
@@ -154,5 +170,12 @@ contract('CasperToken', function (accounts) {
     await meta.transfer(to, await meta.balanceOf(from), {from: from})
     assert(balance.equals(await meta.balanceOf(to)), 'all tokens must be transfered this moment')
 
+    balance = web3.eth.getBalance(owner)
+    metab = web3.eth.getBalance(meta.address)
+    resp = await meta.withdrawFunds(await web3.eth.getBalance(meta.address))
+    gasUsed = web3.eth.getTransactionReceipt(resp.tx).cumulativeGasUsed
+    gasPrice = web3.eth.getTransaction(resp.tx).gasPrice
+    diff = web3.eth.getBalance(owner).sub(balance)
+    assert(diff.equals(metab - gasUsed * gasPrice), 'owner balance must increase properly after withdrawal')
   })
 })

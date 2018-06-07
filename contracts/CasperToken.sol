@@ -210,7 +210,7 @@ contract CasperToken is ERC20Interface, Owned {
 
     function ICOStatus() public view returns (uint usd, uint eth, uint cst) {
         usd = presaleSold.mul(12).div(10**20) + crowdsaleSold.mul(16).div(10**20);
-        usd = usd.add(1040000 * cstToMicro); // pre-ico tokens
+        usd = usd.add(1040000); // pre-ico tokens
         return (usd, ethSold, presaleSold + crowdsaleSold);
     }
 
@@ -218,6 +218,7 @@ contract CasperToken is ERC20Interface, Owned {
     function transferBonus(address _to, uint _usd) public onlyOwner {
         require(!bonusTransfered);
         bonusTransfered = true;
+        // TODO only after soft cap
 
         uint cst = _usd.mul(100).mul(cstToMicro).div(12); // presale tariff
         presaleSold = presaleSold.add(cst);
@@ -304,7 +305,38 @@ contract CasperToken is ERC20Interface, Owned {
         freezed[_to] = freezed[_to].add(cst);
     }
 
+    address public constant vukuAddr = 0xaBa41bEC8bD59a8C14588C755447FEC08aa73C90;
+    address public constant richAddr = 0x6A5e633065475393211aB623286200910F465d02;
+    bool vukuBonusTaken = false;
+    bool richBonusTaken = false;
+    mapping(address => address[]) promoterClients;
+    mapping(address => mapping(address => uint)) promoterBonus;
+
+    function withdrawPromoter() public {
+        address _to = msg.sender;
+        require(_to == vukuAddr || _to == richAddr);
+
+        uint usd;
+        (usd,,) = ICOStatus();
+        require(usd >= 4800000);
+
+        uint bonus = 0;
+        address[] memory clients = promoterClients[_to];
+        for(uint i = 0; i < clients.length; i++) {
+            if (kyc[clients[i]]) {
+                bonus += promoterBonus[_to][clients[i]];
+                delete promoterBonus[_to][clients[i]];
+            }
+        }
+        
+        _to.transfer(bonus);
+    }
+
     function purchaseWithETH(address _to) payable public {
+        purchaseWithPromoter(_to, address(0));
+    }
+
+    function purchaseWithPromoter(address _to, address _ref) payable public {
         require(now >= presaleStartTime && now <= crowdsaleEndTime);
 
         uint _wei = msg.value;
@@ -316,14 +348,15 @@ contract CasperToken is ERC20Interface, Owned {
         if (now < crowdsaleStartTime) {
             cst = _wei.mul(ethRate).div(12000000); // 1 CST = 0.12 $ on presale
             _sellPresale(cst);
+
+            if (_ref == vukuAddr || _ref == richAddr) {
+                promoterClients[_ref].push(_to);
+                promoterBonus[_ref][_to] = _wei.mul(5).div(100);
+            }
         } else {
             cst = _wei.mul(ethRate).div(16000000); // 1 CST = 0.16 $ on crowd-sale
             _sellCrowd(cst, _to);
         }
-
-        assert(cst != 0);
-
-        owner.transfer(_wei);
 
         _freezeTransfer(_to, cst);
     }
@@ -343,9 +376,12 @@ contract CasperToken is ERC20Interface, Owned {
             _sellCrowd(cst, _to);
         }
 
-        assert(cst != 0);
-
         _freezeTransfer(_to, cst);
+    }
+
+    function withdrawFunds(uint _wei) public onlyOwner {
+        // TODO add rules
+        owner.transfer(_wei);
     }
 
     mapping(address => uint) airFreezed;
