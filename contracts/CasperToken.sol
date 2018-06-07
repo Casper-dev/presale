@@ -352,6 +352,10 @@ contract CasperToken is ERC20Interface, Owned {
         require(investorGiven <= investorSupply);
     }
 
+    function () payable public {
+        purchaseWithETH(msg.sender);
+    }
+
     function _freezeTransfer(address _to, uint cst) private {
         _transfer(owner, _to, cst);
         freezed[_to] = freezed[_to].add(cst);
