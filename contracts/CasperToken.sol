@@ -133,6 +133,8 @@ contract CasperToken is ERC20Interface, Owned {
         transfer(0xb424958766e736827Be5A441bA2A54bEeF54fC7C, 100 * cstToMicro);
     }
 
+    /// kycPassed is executed by backend and tells SC
+    /// that particular client has passed KYC
     mapping(address => bool) public kyc;
     function kycPassed(address _mem) public {
         require(msg.sender == owner || msg.sender == admin);
@@ -180,6 +182,14 @@ contract CasperToken is ERC20Interface, Owned {
     }
 
     /// @notify checkTransfer ensures that `from` can send only unlocked tokens
+    /// @notify this function is called for every transfer
+    /// We unlock PURCHASED and BONUS tokens in 5 stages:
+    /// after 28.09.2018 20% are unlocked
+    /// after 30.11.2018 40% are unlocked
+    /// after 31.01.2019 60% are unlocked
+    /// after 29.03.2019 80% are unlocked
+    /// after 31.05.2019 100% are unlocked
+    /// All AIRDROP tokens are 100% unlocked after first stage.
     function checkTransfer(address from, uint tokens) public view {
         uint newBalance = balances[from].sub(tokens);
         if (now < unlockDate5 && from != owner) {
@@ -210,7 +220,9 @@ contract CasperToken is ERC20Interface, Owned {
     bool bonusTransfered = false;
 
     /// @notice by agreement, we can transfer $4.8M from bank
-    /// after softcap is reached
+    /// after softcap is reached.
+    /// @param _to wallet to send CST to
+    /// @param  _usd amount of dollars which is withdrawn
     function transferBonus(address _to, uint _usd) public onlyOwner {
         require(!bonusTransfered);
         bonusTransfered = true;
@@ -250,18 +262,22 @@ contract CasperToken is ERC20Interface, Owned {
         btcLastUpdate = now;
     }
 
+    /// @notify setMaxRate sets max rate for both BTC/ETH to soften
+    /// negative consequences in case our backend gots hacked.
     function setMaxRate(uint ethMax, uint btcMax) public {
         require(msg.sender == director || msg.sender == owner);
         ethRateMax = ethMax;
         btcRateMax = btcMax;
     }
 
+    /// @notify _sellPresale checks CST purchases during crowdsale
     function _sellPresale(uint cst) private {
         require(cst >= bonusLevel0.mul(9997).div(10000));
         presaleSold = presaleSold.add(cst);
         require(presaleSold <= presaleSupply);
     }
 
+    /// @notify _sellCrowd checks CST purchases during crowdsale
     function _sellCrowd(uint cst, address _to) private {
         crowdsaleSold = crowdsaleSold.add(cst);
         require(crowdsaleSold <= crowdsaleSupply.add(presaleSupply).sub(presaleSold));
@@ -275,7 +291,7 @@ contract CasperToken is ERC20Interface, Owned {
         }
     }
 
-    /// @notice bonuses for big investors in %
+    /// @notice addInvestorBonus is used for sending bonuses for big investors in %
     function addInvestorBonus(address _to, uint8 p) public onlyOwner {
         require(p > 0 && p <= 5);
         uint bonus = balances[_to].mul(p).div(100);
@@ -286,7 +302,7 @@ contract CasperToken is ERC20Interface, Owned {
         _freezeTransfer(_to, bonus);
     }
  
-    /// @notice bonuses for big investors in tokens
+    /// @notice addPresaleBonus is used for sending bonuses for big investors in tokens
     function addPresaleBonus(address _to, uint tokens) public {
         require(msg.sender == director || msg.sender == owner);
         _freezeTransfer(_to, tokens);
@@ -299,6 +315,8 @@ contract CasperToken is ERC20Interface, Owned {
         purchaseWithETH(msg.sender);
     }
 
+    /// @notice _freezeTranfer perform actual tokens transfer which
+    /// will be freezed (see also checkTransfer() )
     function _freezeTransfer(address _to, uint cst) private {
         _transfer(owner, _to, cst);
         freezed[_to] = freezed[_to].add(cst);
@@ -309,7 +327,8 @@ contract CasperToken is ERC20Interface, Owned {
     mapping(address => address[]) promoterClients;
     mapping(address => mapping(address => uint)) promoterBonus;
 
-    /// @notice transfers to sender all accumulated bonuses
+    /// @notice withdrawPromoter transfers back to promoter 
+    /// all bonuses accumulated to current moment
     function withdrawPromoter() public {
         address _to = msg.sender;
         require(_to == vukuAddr || _to == richAddr);
@@ -333,9 +352,13 @@ contract CasperToken is ERC20Interface, Owned {
         _to.transfer(bonus);
     }
 
+    /// @notice cashBack will be used in case of failed ICO
+    /// All partitipants can receive their ETH back
     function cashBack(address _to) public {
         uint usd;
         (usd,,) = ICOStatus();
+
+        // ICO fails if crowd-sale is ended and we have not yet reached soft-cap
         require(now > crowdsaleEndTime && usd < softcapUSD);
         require(ethSent[_to] > 0);
 
@@ -361,11 +384,13 @@ contract CasperToken is ERC20Interface, Owned {
         ethSold += _wei;
 
         // accept payment on presale only if it is more than 9997$
+        // actual check is performed in _sellPresale
         if (now < crowdsaleStartTime) {
             require(kyc[msg.sender]);
             cst = _wei.mul(ethRate).div(12000000); // 1 CST = 0.12 $ on presale
             _sellPresale(cst);
 
+            /// we have only 2 recognized promoters
             if (_ref == vukuAddr || _ref == richAddr) {
                 promoterClients[_ref].push(_to);
                 promoterBonus[_ref][_to] = _wei.mul(5).div(100);
@@ -378,6 +403,8 @@ contract CasperToken is ERC20Interface, Owned {
         _freezeTransfer(_to, cst);
     }
 
+    /// @notice purchaseWithBTC is called from backend, where we convert
+    /// BTC to ETH, and then assign tokens to purchaser, using BTC / $ exchange rate.
     function purchaseWithBTC(address _to, uint _satoshi, uint _wei) public {
         require(msg.sender == admin || msg.sender == director || msg.sender == owner);
         require(now >= presaleStartTime && now <= crowdsaleEndTime);
@@ -385,7 +412,8 @@ contract CasperToken is ERC20Interface, Owned {
         ethSold += _wei;
 
         uint cst;
-         // accept payment on presale only if it is more than 9997$
+        // accept payment on presale only if it is more than 9997$
+        // actual check is performed in _sellPresale
         if (now < crowdsaleStartTime) {
             require(kyc[_to]);
             cst = _satoshi.mul(btcRate.mul(10000)) / 12; // 1 CST = 0.12 $ on presale
@@ -398,6 +426,8 @@ contract CasperToken is ERC20Interface, Owned {
         _freezeTransfer(_to, cst);
     }
 
+    /// @notice withdrawFunds is called to send team bonuses after
+    /// then end of the ICO
     function withdrawFunds(uint _wei) public onlyOwner {
         // TODO add time restrictions and ETH distribution
         // TODO not owner but multisig
@@ -405,12 +435,16 @@ contract CasperToken is ERC20Interface, Owned {
     }
 
     mapping(address => uint) airFreezed;
+    /// @notice doAirdrop is called when we launch airdrop.
+    /// @notice airdrop tokens has their own supply.
     function doAirdrop(address[] members, uint[] tokens) public {
         require(msg.sender == owner || msg.sender == director);
         require(members.length == tokens.length);
         uint dropped = 0;
         for(uint i = 0; i < members.length; i++) {
             _transfer(owner, members[i], tokens[i]);
+            // airdrop tokens have another unlock mechanic,
+            // so we store them in separate map
             airFreezed[members[i]] = airFreezed[members[i]].add(tokens[i]);
             dropped = dropped.add(tokens[i]);
         }
@@ -420,6 +454,9 @@ contract CasperToken is ERC20Interface, Owned {
     mapping(address => uint) public whitemap;
     uint public whitelistTokens = 0;
     address[] public whiteList;
+    /// @notice addWhitelistMember is used to whitelist participant.
+    /// This means, that for the first 3 days of crowd-sale `_tokens` CST 
+    /// will be reserved for him.
     function addWhitelistMember(address _mem, uint _tokens) public {
         require(msg.sender == admin || msg.sender == owner);
         if (whitemap[_mem] == 0) {
@@ -430,6 +467,8 @@ contract CasperToken is ERC20Interface, Owned {
     }
 
     uint public adviserSold = 0;
+    /// @notice transferAdviser is called to send tokens to advisers.
+    /// @notice adviser tokens have their own supply
     function transferAdviser(address _adv, uint _tokens) public {
         require(msg.sender == owner || msg.sender == director);
         adviserSold = adviserSold.add(_tokens);
