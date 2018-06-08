@@ -12,6 +12,8 @@ contract CasperToken is ERC20Interface, Owned {
     uint8 public constant decimals = 18;
 
     uint constant public cstToMicro = uint(10) ** decimals;
+
+    // This constants reflects CST token distribution
     uint constant public _totalSupply    = 440000000 * cstToMicro;
     uint constant public preICOSupply    = 13000000 * cstToMicro;
     uint constant public presaleSupply   = 183574716 * cstToMicro;
@@ -24,15 +26,22 @@ contract CasperToken is ERC20Interface, Owned {
     uint constant public bountySupply    = 8800000 * cstToMicro;
     uint constant public referralSupply  = 3950000 * cstToMicro;
 
+    // This variables accumulate amount of sold CST during
+    // presale, crowdsale, or given to investors as bonus.
     uint public presaleSold = 0;
     uint public crowdsaleSold = 0;
     uint public investorGiven = 0;
+
+    // Amount of ETH received during ICO
     uint public ethSold = 0;
 
     uint constant public softcapUSD = 4800000;
 
+    // Presale lower bound in dollars.
     uint constant public bonusLevel0 = cstToMicro * 10000 * 100 / 12; // 10000$
 
+    // Tokens are unlocked in 5 stages, by 20% (see doc to checkTransfer)
+    // All dates are stored as timestamps.
     uint constant public unlockDate1 = 1538179199; // 28.09.2018 23:59:59
     uint constant public unlockDate2 = 1543622399; // 30.11.2018 23:59:59
     uint constant public unlockDate3 = 1548979199; // 31.01.2019 23:59:59
@@ -64,6 +73,7 @@ contract CasperToken is ERC20Interface, Owned {
     }
 
     bool assignedPreico = false;
+    /// @notice assignPreicoTokens transfers 10x tokens to pre-ICO participants
     function assignPreicoTokens() public {
         require(msg.sender == owner || msg.sender == director);
         require(!assignedPreico);
@@ -107,6 +117,8 @@ contract CasperToken is ERC20Interface, Owned {
     }
 
     bool assignedTeam = false;
+    /// @notice assignTeamTokens assigns tokens to team members
+    /// @notice tokens for team have their own supply
     function assignTeamTokens() public {
         require(msg.sender == owner || msg.sender == director);
         require(!assignedTeam);
@@ -133,7 +145,7 @@ contract CasperToken is ERC20Interface, Owned {
         transfer(0xb424958766e736827Be5A441bA2A54bEeF54fC7C, 100 * cstToMicro);
     }
 
-    /// kycPassed is executed by backend and tells SC
+    /// @nptice kycPassed is executed by backend and tells SC
     /// that particular client has passed KYC
     mapping(address => bool) public kyc;
     function kycPassed(address _mem) public {
@@ -141,12 +153,14 @@ contract CasperToken is ERC20Interface, Owned {
         kyc[_mem] = true;
     }
 
-    // For every pre-sale participant this mapping stores
-    // amount of 10^-decimals CST it has.
+    // mappings for implementing ERC20
     mapping(address => uint) balances;
     mapping(address => mapping(address => uint)) allowed;
+
+    // mapping for implementing unlock mechanic
     mapping(address => uint) freezed;
 
+    // ERC20 standard functions
     function totalSupply() public view returns (uint) {
         return _totalSupply - balances[owner];
     }
