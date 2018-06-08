@@ -309,8 +309,6 @@ contract CasperToken is ERC20Interface, Owned {
 
     address public constant vukuAddr = 0xaBa41bEC8bD59a8C14588C755447FEC08aa73C90;
     address public constant richAddr = 0x6A5e633065475393211aB623286200910F465d02;
-    bool vukuBonusTaken = false;
-    bool richBonusTaken = false;
     mapping(address => address[]) promoterClients;
     mapping(address => mapping(address => uint)) promoterBonus;
 
@@ -360,6 +358,7 @@ contract CasperToken is ERC20Interface, Owned {
 
         // accept payment on presale only if it is more than 9997$
         if (now < crowdsaleStartTime) {
+            require(kyc[msg.sender]);
             cst = _wei.mul(ethRate).div(12000000); // 1 CST = 0.12 $ on presale
             _sellPresale(cst);
 
@@ -383,6 +382,7 @@ contract CasperToken is ERC20Interface, Owned {
         uint cst;
          // accept payment on presale only if it is more than 9997$
         if (now < crowdsaleStartTime) {
+            require(kyc[_to]);
             cst = _satoshi.mul(btcRate.mul(10000)) / 12; // 1 CST = 0.12 $ on presale
             _sellPresale(cst);
         } else {
@@ -394,7 +394,7 @@ contract CasperToken is ERC20Interface, Owned {
     }
 
     function withdrawFunds(uint _wei) public onlyOwner {
-        // TODO add rules
+        // TODO add time restrictions and ETH distribution
         owner.transfer(_wei);
     }
 
