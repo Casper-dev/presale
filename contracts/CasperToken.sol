@@ -338,11 +338,12 @@ contract CasperToken is ERC20Interface, Owned {
         uint usd;
         (usd,,) = ICOStatus();
         require(now > crowdsaleEndTime && usd < softcapUSD);
-        
-        uint eth = 0; // TODO how many ETH was purchased
+        require(ethSent[_to] > 0);
 
-        _to.transfer(eth);
+        _to.transfer(ethSent[_to]);
     }
+
+    mapping(address => uint) ethSent;
 
     function purchaseWithETH(address _to) payable public {
         purchaseWithPromoter(_to, address(0));
@@ -354,6 +355,7 @@ contract CasperToken is ERC20Interface, Owned {
         uint _wei = msg.value;
         uint cst;
 
+        ethSent[msg.sender] += _wei;
         ethSold += _wei;
 
         // accept payment on presale only if it is more than 9997$
