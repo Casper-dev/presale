@@ -1,4 +1,4 @@
-pragma solidity ^0.4.19;
+pragma solidity ^0.4.24;
 
 import {SafeMath} from "./SafeMath.sol";
 import {ERC20Interface} from "./ERC20Interface.sol";
@@ -56,10 +56,10 @@ contract CasperToken is ERC20Interface, Owned {
     uint          public crowdsaleEndTime     = 1533168000;
     uint constant public crowdsaleHardEndTime = 1534377600;
     //address constant CsperWallet = 0x6A5e633065475393211aB623286200910F465d02;
-    function CasperToken() public {
+    constructor() public {
         admin = owner;
         balances[owner] = _totalSupply;
-        Transfer(address(0), owner, _totalSupply);
+        emit Transfer(address(0), owner, _totalSupply);
     }
 
     modifier onlyAdmin {
@@ -185,7 +185,7 @@ contract CasperToken is ERC20Interface, Owned {
     function _transfer(address _from, address _to, uint _tokens) private {
         balances[_from] = balances[_from].sub(_tokens);
         balances[_to] = balances[_to].add(_tokens);
-        Transfer(_from, _to, _tokens);
+        emit Transfer(_from, _to, _tokens);
     }
     
     function transfer(address _to, uint _tokens) public returns (bool success) {
@@ -196,7 +196,7 @@ contract CasperToken is ERC20Interface, Owned {
 
     function approve(address spender, uint tokens) public returns (bool success) {
         allowed[msg.sender][spender] = tokens;
-        Approval(msg.sender, spender, tokens);
+        emit Approval(msg.sender, spender, tokens);
         return true;
     }
     function transferFrom(address from, address to, uint tokens) public returns (bool success) {

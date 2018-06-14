@@ -1,4 +1,4 @@
-pragma solidity ^0.4.19;
+pragma solidity ^0.4.24;
 
 // ----------------------------------------------------------------------------
 // Owned contract
@@ -6,9 +6,7 @@ pragma solidity ^0.4.19;
 contract Owned {
     address public owner;
 
-    event OwnershipTransferred(address indexed _from, address indexed _to);
-
-    function Owned() public {
+    constructor() public {
         owner = msg.sender;
     }
 
