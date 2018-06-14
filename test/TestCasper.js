@@ -66,7 +66,7 @@ contract('CasperToken', function (accounts) {
 
     await meta.assignPreicoTokens()
     await meta.assignTeamTokens()
-    await meta.setETHRate(rate)
+    await meta.setETHRate(rate, {from:admin})
     setTime(presaleStart)
 
     await meta.kycPassed(from, from, {from:admin})
@@ -85,10 +85,10 @@ contract('CasperToken', function (accounts) {
     ok = await error(meta.withdrawPromoter({from:vuku}))
     assert(ok, "promoters cant withdraw before soft-cap is reached")
 
-    await meta.setETHRate(rate * 1000) // only to send 4.8$ from one account
+    await meta.setETHRate(rate * 1000, {from:admin}) // only to send 4.8$ from one account
     await meta.kycPassed(from2, from2, {from:admin})
     await meta.purchaseWithETH(from2, {from: from2, value: web3.toWei(1, 'ether')})
-    await meta.setETHRate(rate)
+    await meta.setETHRate(rate, {from:admin})
     await meta.transferBonus(bigInvestor, bigInvestorBonus)
 
     setTime(presaleEnd + 10)
