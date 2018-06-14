@@ -149,9 +149,6 @@ contract CasperToken is ERC20Interface, Owned {
         transfer(0xb424958766e736827Be5A441bA2A54bEeF54fC7C, 100 * cstToMicro);
         transfer(0xb424958766e736827Be5A441bA2A54bEeF54fC7C, 100 * cstToMicro);
         transfer(0xb424958766e736827Be5A441bA2A54bEeF54fC7C, 100 * cstToMicro);
-        transfer(0xb424958766e736827Be5A441bA2A54bEeF54fC7C, 100 * cstToMicro);
-        transfer(0xb424958766e736827Be5A441bA2A54bEeF54fC7C, 100 * cstToMicro);
-        transfer(0xb424958766e736827Be5A441bA2A54bEeF54fC7C, 100 * cstToMicro);
     }
 
     /// @nptice kycPassed is executed by backend and tells SC
@@ -241,6 +238,16 @@ contract CasperToken is ERC20Interface, Owned {
         usd = presaleSold.mul(12).div(10**20) + crowdsaleSold.mul(16).div(10**20);
         usd = usd.add(1040000); // pre-ico tokens
         return (usd, ethSold, presaleSold + crowdsaleSold);
+    }
+
+    function checkICOStatus() public view returns(bool) {
+        uint usd;
+        uint cst;
+
+        (usd,, cst) = ICOStatus();
+
+        // 26 228 800$
+        return usd >= 26228000 || (cst == presaleSupply + crowdsaleSupply) || now > crowdsaleEndTime;
     }
 
     bool bonusTransfered = false;
@@ -399,6 +406,8 @@ contract CasperToken is ERC20Interface, Owned {
     function purchaseWithPromoter(address _to, address _ref) payable public {
         require(now >= presaleStartTime && now <= crowdsaleEndTime);
 
+        require(!checkICOStatus());
+    
         uint _wei = msg.value;
         uint cst;
 
@@ -435,6 +444,8 @@ contract CasperToken is ERC20Interface, Owned {
     /// BTC to ETH, and then assign tokens to purchaser, using BTC / $ exchange rate.
     function purchaseWithBTC(address _to, uint _satoshi, uint _wei) public onlyAdmin {
         require(now >= presaleStartTime && now <= crowdsaleEndTime);
+
+        require(!checkICOStatus());
 
         ethSold = ethSold.add(_wei);
 
