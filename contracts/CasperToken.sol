@@ -148,9 +148,13 @@ contract CasperToken is ERC20Interface, Owned {
     /// @nptice kycPassed is executed by backend and tells SC
     /// that particular client has passed KYC
     mapping(address => bool) public kyc;
-    function kycPassed(address _mem) public {
+    mapping(address => address) public referral;
+    function kycPassed(address _mem, address _ref) public {
         require(msg.sender == owner || msg.sender == admin);
         kyc[_mem] = true;
+        if (_ref == richAddr || _ref == vukuAddr) {
+            referral[_mem] = _ref;
+        }
     }
 
     // mappings for implementing ERC20
@@ -195,8 +199,8 @@ contract CasperToken is ERC20Interface, Owned {
         return true;
     }
 
-    /// @notify checkTransfer ensures that `from` can send only unlocked tokens
-    /// @notify this function is called for every transfer
+    /// @notice checkTransfer ensures that `from` can send only unlocked tokens
+    /// @notice this function is called for every transfer
     /// We unlock PURCHASED and BONUS tokens in 5 stages:
     /// after 28.09.2018 20% are unlocked
     /// after 30.11.2018 40% are unlocked
@@ -276,7 +280,7 @@ contract CasperToken is ERC20Interface, Owned {
         btcLastUpdate = now;
     }
 
-    /// @notify setMaxRate sets max rate for both BTC/ETH to soften
+    /// @notice setMaxRate sets max rate for both BTC/ETH to soften
     /// negative consequences in case our backend gots hacked.
     function setMaxRate(uint ethMax, uint btcMax) public {
         require(msg.sender == director || msg.sender == owner);
@@ -284,14 +288,14 @@ contract CasperToken is ERC20Interface, Owned {
         btcRateMax = btcMax;
     }
 
-    /// @notify _sellPresale checks CST purchases during crowdsale
+    /// @notice _sellPresale checks CST purchases during crowdsale
     function _sellPresale(uint cst) private {
         require(cst >= bonusLevel0.mul(9997).div(10000));
         presaleSold = presaleSold.add(cst);
         require(presaleSold <= presaleSupply);
     }
 
-    /// @notify _sellCrowd checks CST purchases during crowdsale
+    /// @notice _sellCrowd checks CST purchases during crowdsale
     function _sellCrowd(uint cst, address _to) private {
         crowdsaleSold = crowdsaleSold.add(cst);
         require(crowdsaleSold <= crowdsaleSupply.add(presaleSupply).sub(presaleSold));
@@ -383,7 +387,7 @@ contract CasperToken is ERC20Interface, Owned {
     mapping(address => uint) ethSent;
 
     function purchaseWithETH(address _to) payable public {
-        purchaseWithPromoter(_to, address(0));
+        purchaseWithPromoter(_to, referral[msg.sender]);
     }
 
     /// @notice purchases tokens, which a send to `_to` with 5% returned to `_ref`
@@ -394,8 +398,8 @@ contract CasperToken is ERC20Interface, Owned {
         uint _wei = msg.value;
         uint cst;
 
-        ethSent[msg.sender] += _wei;
-        ethSold += _wei;
+        ethSent[msg.sender] = ethSent[msg.sender].add(_wei);
+        ethSold = ethSold.add(_wei);
 
         // accept payment on presale only if it is more than 9997$
         // actual check is performed in _sellPresale
@@ -410,7 +414,12 @@ contract CasperToken is ERC20Interface, Owned {
                 promoterBonus[_ref][_to] = _wei.mul(5).div(100);
             }
         } else {
-            cst = _wei.mul(ethRate).div(16000000); // 1 CST = 0.16 $ on crowd-sale
+            uint mod = 16000000;
+            if (approvedInvestors[msg.sender]) {
+                approvedInvestors[msg.sender] = false;
+                mod = 12000000;
+            }
+            cst = _wei.mul(ethRate).div(mod); // 1 CST = 0.16 $ on crowd-sale
             _sellCrowd(cst, _to);
         }
 
@@ -423,17 +432,22 @@ contract CasperToken is ERC20Interface, Owned {
         require(msg.sender == admin || msg.sender == director || msg.sender == owner);
         require(now >= presaleStartTime && now <= crowdsaleEndTime);
 
-        ethSold += _wei;
+        ethSold = ethSold.add(_wei);
 
         uint cst;
         // accept payment on presale only if it is more than 9997$
         // actual check is performed in _sellPresale
         if (now < crowdsaleStartTime) {
             require(kyc[_to]);
-            cst = _satoshi.mul(btcRate.mul(10000)) / 12; // 1 CST = 0.12 $ on presale
+            cst = _satoshi.mul(btcRate.mul(10000)).div(12); // 1 CST = 0.12 $ on presale
             _sellPresale(cst);
         } else {
-            cst = _satoshi.mul(btcRate.mul(10000)) / 16; // 1 CST = 0.16 $ on presale
+            uint mod = 16;
+            if (approvedInvestors[msg.sender]) {
+                approvedInvestors[msg.sender] = false;
+                mod = 12;
+            }
+            cst = _satoshi.mul(btcRate.mul(10000)).div(mod); // 1 CST = 0.16 $ on presale
             _sellCrowd(cst, _to);
         }
 
@@ -488,5 +502,10 @@ contract CasperToken is ERC20Interface, Owned {
         adviserSold = adviserSold.add(_tokens);
         require(adviserSold <= adviserSupply);
         _freezeTransfer(_adv, _tokens);
+    }
+
+    mapping(address => bool) approvedInvestors;
+    function approveInvestor(address _addr) public onlyOwner {
+        approvedInvestors[_addr] = true;
     }
 }

@@ -69,7 +69,7 @@ contract('CasperToken', function (accounts) {
     await meta.setETHRate(rate)
     setTime(presaleStart)
 
-    await meta.kycPassed(from, {from:admin})
+    await meta.kycPassed(from, from, {from:admin})
 
     ok = await error(meta.purchaseWithETH(from, {from: from, value: web3.toWei(0.5, 'ether')}))
     assert(ok, 'should not allow purchases smaller than $10k')
@@ -79,14 +79,14 @@ contract('CasperToken', function (accounts) {
     //ok = await error(meta.transferBonus(bigInvestor, bigInvestorBonus))
     //assert(ok, '4.8M$ purchase should have failed before we collected another 4.8$')
 
-    await meta.kycPassed(vukuClient, {from:admin})
-    await meta.purchaseWithPromoter(vukuClient, vuku, {from:vukuClient, value:wei})
+    await meta.kycPassed(vukuClient, vuku, {from:admin})
+    await meta.purchaseWithETH(vukuClient, {from:vukuClient, value:wei})
 
     ok = await error(meta.withdrawPromoter({from:vuku}))
     assert(ok, "promoters cant withdraw before soft-cap is reached")
 
     await meta.setETHRate(rate * 1000) // only to send 4.8$ from one account
-    await meta.kycPassed(from2, {from:admin})
+    await meta.kycPassed(from2, from2, {from:admin})
     await meta.purchaseWithETH(from2, {from: from2, value: web3.toWei(1, 'ether')})
     await meta.setETHRate(rate)
     await meta.transferBonus(bigInvestor, bigInvestorBonus)
