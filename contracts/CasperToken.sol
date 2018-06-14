@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24;
+pragma solidity 0.4.24;
 
 import {SafeMath} from "./SafeMath.sol";
 import {ERC20Interface} from "./ERC20Interface.sol";
@@ -74,7 +74,7 @@ contract CasperToken is ERC20Interface, Owned {
     }
 
     address admin;
-    function setAdmin(address _newAdmin) public onlyOwner {
+    function setAdmin(address _newAdmin) public onlyOwnerAndDirector {
         admin = _newAdmin;
     }
 
@@ -241,13 +241,20 @@ contract CasperToken is ERC20Interface, Owned {
     }
 
     function checkICOStatus() public view returns(bool) {
-        uint usd;
+        uint eth;
         uint cst;
 
-        (usd,, cst) = ICOStatus();
+        (, eth, cst) = ICOStatus();
+
+        uint dollarsRecvd = eth.mul(ethRate).div(10**8);
 
         // 26 228 800$
-        return usd >= 26228000 || (cst == presaleSupply + crowdsaleSupply) || now > crowdsaleEndTime;
+        return dollarsRecvd >= 26228000 || (cst == presaleSupply + crowdsaleSupply) || now > crowdsaleEndTime;
+    }
+
+    bool icoClosed = false;
+    function closeICO() public onlyOwnerAndDirector {
+        icoClosed = checkICOStatus();
     }
 
     bool bonusTransfered = false;
@@ -406,7 +413,7 @@ contract CasperToken is ERC20Interface, Owned {
     function purchaseWithPromoter(address _to, address _ref) payable public {
         require(now >= presaleStartTime && now <= crowdsaleEndTime);
 
-        require(!checkICOStatus());
+        require(!icoClosed);
     
         uint _wei = msg.value;
         uint cst;
@@ -420,10 +427,7 @@ contract CasperToken is ERC20Interface, Owned {
             require(kyc[msg.sender]);
             cst = _wei.mul(ethRate).div(12000000); // 1 CST = 0.12 $ on presale
 
-            if (approvedInvestors[msg.sender]) {
-                delete approvedInvestors[msg.sender];
-                require(now < crowdsaleStartTime || cst >= bonusLevel100);
-            }
+            require(now < crowdsaleStartTime || cst >= bonusLevel100);
 
             _sellPresale(cst);
 
@@ -445,7 +449,7 @@ contract CasperToken is ERC20Interface, Owned {
     function purchaseWithBTC(address _to, uint _satoshi, uint _wei) public onlyAdmin {
         require(now >= presaleStartTime && now <= crowdsaleEndTime);
 
-        require(!checkICOStatus());
+        require(!icoClosed);
 
         ethSold = ethSold.add(_wei);
 
@@ -456,10 +460,8 @@ contract CasperToken is ERC20Interface, Owned {
             require(kyc[msg.sender]);
             cst = _satoshi.mul(btcRate.mul(10000)).div(12); // 1 CST = 0.12 $ on presale
 
-            if (approvedInvestors[msg.sender]) {
-                delete approvedInvestors[msg.sender];
-                require(now < crowdsaleStartTime || cst >= bonusLevel100);
-            }
+            require(now < crowdsaleStartTime || cst >= bonusLevel100);
+
             _sellPresale(cst);
         } else {
             cst = _satoshi.mul(btcRate.mul(10000)).div(16); // 1 CST = 0.16 $ on presale
