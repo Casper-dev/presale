@@ -497,11 +497,14 @@ contract CasperToken is ERC20Interface, Owned {
     uint public adviserSold = 0;
     /// @notice transferAdviser is called to send tokens to advisers.
     /// @notice adviser tokens have their own supply
-    function transferAdviser(address _adv, uint _tokens) public {
+    function transferAdviser(address[] _adv, uint[] _tokens) public {
         require(msg.sender == owner || msg.sender == director);
-        adviserSold = adviserSold.add(_tokens);
+        require(_adv.length == _tokens.length);
+        for (uint i = 0; i < _adv.length; i++) {
+            adviserSold = adviserSold.add(_tokens[i]);
+            _freezeTransfer(_adv[i], _tokens[i]);
+        }
         require(adviserSold <= adviserSupply);
-        _freezeTransfer(_adv, _tokens);
     }
 
     mapping(address => bool) approvedInvestors;
