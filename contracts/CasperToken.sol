@@ -39,6 +39,7 @@ contract CasperToken is ERC20Interface, Owned {
 
     // Presale lower bound in dollars.
     uint constant public bonusLevel0 = cstToMicro * 10000 * 100 / 12; // 10000$
+    uint constant public bonusLevel100 = cstToMicro * 100000 * 100 / 12; // 100000$
 
     // Tokens are unlocked in 5 stages, by 20% (see doc to checkTransfer)
     // All dates are stored as timestamps.
@@ -406,23 +407,24 @@ contract CasperToken is ERC20Interface, Owned {
 
         // accept payment on presale only if it is more than 9997$
         // actual check is performed in _sellPresale
-        if (now < crowdsaleStartTime) {
+        if (now < crowdsaleStartTime || approvedInvestors[msg.sender]) {
             require(kyc[msg.sender]);
             cst = _wei.mul(ethRate).div(12000000); // 1 CST = 0.12 $ on presale
+
+            if (approvedInvestors[msg.sender]) {
+                delete approvedInvestors[msg.sender];
+                require(now < crowdsaleStartTime || cst >= bonusLevel100);
+            }
+
             _sellPresale(cst);
 
             /// we have only 2 recognized promoters
-            if (_ref == vukuAddr || _ref == richAddr) {
+            if (now < crowdsaleStartTime && _ref == vukuAddr || _ref == richAddr) {
                 promoterClients[_ref].push(_to);
                 promoterBonus[_ref][_to] = _wei.mul(5).div(100);
             }
         } else {
-            uint mod = 16000000;
-            if (approvedInvestors[msg.sender]) {
-                approvedInvestors[msg.sender] = false;
-                mod = 12000000;
-            }
-            cst = _wei.mul(ethRate).div(mod); // 1 CST = 0.16 $ on crowd-sale
+            cst = _wei.mul(ethRate).div(16000000); // 1 CST = 0.16 $ on crowd-sale
             _sellCrowd(cst, _to);
         }
 
@@ -439,17 +441,17 @@ contract CasperToken is ERC20Interface, Owned {
         uint cst;
         // accept payment on presale only if it is more than 9997$
         // actual check is performed in _sellPresale
-        if (now < crowdsaleStartTime) {
-            require(kyc[_to]);
+        if (now < crowdsaleStartTime || approvedInvestors[msg.sender]) {
+            require(kyc[msg.sender]);
             cst = _satoshi.mul(btcRate.mul(10000)).div(12); // 1 CST = 0.12 $ on presale
+
+            if (approvedInvestors[msg.sender]) {
+                delete approvedInvestors[msg.sender];
+                require(now < crowdsaleStartTime || cst >= bonusLevel100);
+            }
             _sellPresale(cst);
         } else {
-            uint mod = 16;
-            if (approvedInvestors[msg.sender]) {
-                approvedInvestors[msg.sender] = false;
-                mod = 12;
-            }
-            cst = _satoshi.mul(btcRate.mul(10000)).div(mod); // 1 CST = 0.16 $ on presale
+            cst = _satoshi.mul(btcRate.mul(10000)).div(16); // 1 CST = 0.16 $ on presale
             _sellCrowd(cst, _to);
         }
 
