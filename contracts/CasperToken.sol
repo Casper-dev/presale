@@ -475,6 +475,7 @@ contract CasperToken is ERC20Interface, Owned {
     /// then end of the ICO
     function withdrawFunds(uint _wei) public onlyOwner {
         // TODO add time restrictions and ETH distribution
+        // TODO for team use all received $ minus $4.8M
         // TODO not owner but multisig
         owner.transfer(_wei);
     }
