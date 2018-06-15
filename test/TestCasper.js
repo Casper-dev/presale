@@ -52,7 +52,7 @@ contract('CasperToken', function (accounts) {
     var balance, ok
 
     const wei = web3.toWei(12, 'ether') // 12 ETH
-    const [, admin, from, from2, to, normal, slowpoke, hyperslowpoke, bigInvestor, vukuClient, air1, air2] = accounts
+    const [, admin, from, from2, to, normal, slowpoke, hyperslowpoke, bigInvestor, wuguClient, air1, air2] = accounts
     const airCST = web3.toBigNumber(10 ** 18).mul(10) // 10 CST
     const bigInvestorBonus = web3.toBigNumber(4800000)
 
@@ -60,7 +60,7 @@ contract('CasperToken', function (accounts) {
     
     // truffle must be run in network with this account
     // 101e95f9ef90e52adf32930908f01f53d34b1e04c9707d765de77760942d0441
-    const vuku = '0xaba41bec8bd59a8c14588c755447fec08aa73c90'
+    const wugu = '0xaba41bec8bd59a8c14588c755447fec08aa73c90'
 
     await meta.setAdmin(admin)
 
@@ -79,10 +79,10 @@ contract('CasperToken', function (accounts) {
     //ok = await error(meta.transferBonus(bigInvestor, bigInvestorBonus))
     //assert(ok, '4.8M$ purchase should have failed before we collected another 4.8$')
 
-    await meta.kycPassed(vukuClient, vuku, {from:admin})
-    await meta.purchaseWithETH(vukuClient, {from:vukuClient, value:wei})
+    await meta.kycPassed(wuguClient, wugu, {from:admin})
+    await meta.purchaseWithETH(wuguClient, {from:wuguClient, value:wei})
 
-    ok = await error(meta.withdrawPromoter({from:vuku}))
+    ok = await error(meta.withdrawPromoter({from:wugu}))
     assert(ok, "promoters cant withdraw before soft-cap is reached")
 
     await meta.setETHRate(rate * 1000, {from:admin}) // only to send 4.8$ from one account
@@ -93,14 +93,14 @@ contract('CasperToken', function (accounts) {
 
     setTime(presaleEnd + 10)
 
-    balance = web3.eth.getBalance(vuku)
+    balance = web3.eth.getBalance(wugu)
     bonus = web3.toBigNumber(wei).mul(5).div(100)
-    resp = await meta.withdrawPromoter({from:vuku})
+    resp = await meta.withdrawPromoter({from:wugu})
 
     gasUsed = web3.eth.getTransactionReceipt(resp.tx).cumulativeGasUsed
     gasPrice = web3.eth.getTransaction(resp.tx).gasPrice
-    diff = web3.eth.getBalance(vuku).sub(balance)
-    assert(diff.equals(bonus - gasUsed * gasPrice), 'vuku balance must increase properly')
+    diff = web3.eth.getBalance(wugu).sub(balance)
+    assert(diff.equals(bonus - gasUsed * gasPrice), 'wugu balance must increase properly')
     
 
     await meta.purchaseWithETH(normal, {from: normal, value: wei})
@@ -112,12 +112,8 @@ contract('CasperToken', function (accounts) {
     ok = await error(meta.purchaseWithETH(slowpoke, {from: slowpoke, value: wei}))
     assert(ok, 'slowpoke should be unable to purchase after end of crowd-sale')
 
-    await meta.prolongCrowdsale()
-    await meta.purchaseWithETH(slowpoke, {from: slowpoke, value: wei})
-
-    setTime(crowdHard + 10)
-    ok = await error(meta.purchaseWithETH(hyperslowpoke, {from: hyperslowpoke, value: wei}))
-    assert(ok, 'hyperslowpoke should be unable to purchase after hard-end of crowd-sale')
+    ok = await error(meta.prolongCrowdsale())
+    assert(ok, 'crowdsale can be prolonged only before ICO finish')
 
     setTime(unlock1 - 10)
     ok = await error(meta.transfer(to, 1, {from: from}))
@@ -125,8 +121,8 @@ contract('CasperToken', function (accounts) {
 
     setTime(unlock2 - 10)
     
-    ok = await error(meta.transfer(to, 1, {from: air1}))
-    assert(ok, 'transfer without KYC should have failed ')
+    //ok = await error(meta.transfer(to, 1, {from: air1}))
+    //assert(ok, 'transfer without KYC should have failed ')
 
     balance = await meta.balanceOf(from)
 
@@ -156,10 +152,10 @@ contract('CasperToken', function (accounts) {
 
     balance = web3.eth.getBalance(owner)
     metab = web3.eth.getBalance(meta.address)
-    resp = await meta.withdrawFunds(await web3.eth.getBalance(meta.address))
+    resp = await meta.withdrawFunds(metab)
     gasUsed = web3.eth.getTransactionReceipt(resp.tx).cumulativeGasUsed
     gasPrice = web3.eth.getTransaction(resp.tx).gasPrice
     diff = web3.eth.getBalance(owner).sub(balance)
-    assert(diff.equals(metab - gasUsed * gasPrice), 'owner balance must increase properly after withdrawal')
+    assert(diff.equals(metab.mul(85).div(100) - gasUsed * gasPrice), 'owner balance must increase properly after withdrawal')
   })
 })

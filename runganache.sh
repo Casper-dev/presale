@@ -38,7 +38,7 @@
 
 
 ether=1000000000000000000000
-ganache-cli -p 7545 --hostname 127.0.0.1 \
+ganache-cli -p 7545 --hostname 0.0.0.0 \
     --account=0x33f21e2df2eec63add519eabfeb03b9083d9be8801698ca3f02568741ab52271,$ether \
     --account=0x20a0bef21a27bd71028a297ce756c29e4db46ea78517a2638bd36832e43f31ab,$ether \
     --account=0x154c7036ddafa926b85b5cb79838baaf8b0b298a634f4596f22fc8ab71dda317,$ether \

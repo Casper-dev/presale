@@ -35,9 +35,11 @@ contract CasperToken is ERC20Interface, Owned {
     // Amount of ETH received during ICO
     uint public ethSold = 0;
 
-    uint constant public softcapUSD = 4800000;
+    uint constant public softcapUSD = 4500000;
+    uint constant public preicoUSD  = 1040000;
 
     // Presale lower bound in dollars.
+    uint constant public crowdsaleMinUSD = cstToMicro * 10 * 100 / 12;
     uint constant public bonusLevel0 = cstToMicro * 10000 * 100 / 12; // 10000$
     uint constant public bonusLevel100 = cstToMicro * 100000 * 100 / 12; // 100000$
 
@@ -108,19 +110,14 @@ contract CasperToken is ERC20Interface, Owned {
         _freezeTransfer(0x42C73b8945a82041B06428359a94403a2e882406, 10 * 13080080000000000000000);
         _freezeTransfer(0xa4c9595b90BBa7B4d805e555E477200C61711F3a, 10 * 6590480000000000000000);
         _freezeTransfer(0xb93b8ceD7CD86a667E12104831b4d514365F9DF8, 10 * 116358235759665569280);
-        //transfer(0xD00D4E40DAFF894961Cf10458FD283c58e12CF4f, 10 * 0);
-        //transfer(0x426043334762056a853e8Cfd8231e72E27Af5Cb7, 10 * 0);
         _freezeTransfer(0xa94F999b3f76EB7b2Ba7B17fC37E912Fa2538a87, 10 * 10389600000000000000000);
         _freezeTransfer(0xD65B9b98ca08024C3c19868d42C88A3E47D67120, 10 * 25892880000000000000000);
         _freezeTransfer(0x3a978a9Cc36f1FE5Aab6D31E41c08d8380ad0ACB, 10 * 548080000000000000000);
         _freezeTransfer(0xBD46d909D55d760E2f79C5838c5C42E45c0a853A, 10 * 7526480000000000000000);
         _freezeTransfer(0xdD9d289d4699fDa518cf91EaFA029710e3Cbb7AA, 10 * 3324880000000000000000);
-        //transfer(0x6A5e633065475393211aB623286200910F465d02, 10 * 0);
         _freezeTransfer(0x8671B362902C3839ae9b4bc099fd24CdeFA026F4, 10 * 21836880000000000000000);
         _freezeTransfer(0xf3C25Ee648031B28ADEBDD30c91056c2c5cd9C6b, 10 * 132284880000000000000000);
         _freezeTransfer(0x1A2392fB72255eAe19BB626678125A506a93E363, 10 * 61772880000000000000000);
-        //transfer(0x0000000000000000000000000000000000000000, 10 * 0);
-        //transfer(0xd45302EdA0ec8e0d5707a2bfD55f41432377B54d, 10 * 0);
         _freezeTransfer(0xCE2cEa425f7635557CFC00E18bc338DdE5B16C9A, 10 * 105360320000000000000000);
         _freezeTransfer(0x952AD1a2891506AC442D95DA4C0F1AE70A27b677, 10 * 100252880000000000000000);
         _freezeTransfer(0x5eE1fC4D251143Da96db2a5cD61507f2203bf7b7, 10 * 80492880000000000000000);
@@ -133,22 +130,27 @@ contract CasperToken is ERC20Interface, Owned {
         require(!assignedTeam);
         assignedTeam = true;
 
-        _freezeTransfer(0xb424958766e736827Be5A441bA2A54bEeF54fC7C, 100 * cstToMicro);
-        _freezeTransfer(0xb424958766e736827Be5A441bA2A54bEeF54fC7C, 100 * cstToMicro);
-        _freezeTransfer(0xb424958766e736827Be5A441bA2A54bEeF54fC7C, 100 * cstToMicro);
-        _freezeTransfer(0xb424958766e736827Be5A441bA2A54bEeF54fC7C, 100 * cstToMicro);
-        _freezeTransfer(0xb424958766e736827Be5A441bA2A54bEeF54fC7C, 100 * cstToMicro);
-        _freezeTransfer(0xb424958766e736827Be5A441bA2A54bEeF54fC7C, 100 * cstToMicro);
-        _freezeTransfer(0xb424958766e736827Be5A441bA2A54bEeF54fC7C, 100 * cstToMicro);
-        _freezeTransfer(0xb424958766e736827Be5A441bA2A54bEeF54fC7C, 100 * cstToMicro);
-        _freezeTransfer(0xb424958766e736827Be5A441bA2A54bEeF54fC7C, 100 * cstToMicro);
-        _freezeTransfer(0xb424958766e736827Be5A441bA2A54bEeF54fC7C, 100 * cstToMicro);
-        _freezeTransfer(0xb424958766e736827Be5A441bA2A54bEeF54fC7C, 100 * cstToMicro);
-        _freezeTransfer(0xb424958766e736827Be5A441bA2A54bEeF54fC7C, 100 * cstToMicro);
-        _freezeTransfer(0xb424958766e736827Be5A441bA2A54bEeF54fC7C, 100 * cstToMicro);
-        _freezeTransfer(0xb424958766e736827Be5A441bA2A54bEeF54fC7C, 100 * cstToMicro);
-        _freezeTransfer(0xb424958766e736827Be5A441bA2A54bEeF54fC7C, 100 * cstToMicro);
-        _freezeTransfer(0xb424958766e736827Be5A441bA2A54bEeF54fC7C, 100 * cstToMicro);
+        _freezeTransfer(0x0000000000000000000000000000000000000000, 13251585 * cstToMicro); // ArK
+        _freezeTransfer(0x0000000000000000000000000000000000000000,  9613895 * cstToMicro); // Vi4
+        _freezeTransfer(0x0000000000000000000000000000000000000000,  1039340 * cstToMicro); // Se4
+        _freezeTransfer(0x0000000000000000000000000000000000000000, 12991750 * cstToMicro); // AnD
+        _freezeTransfer(0x0000000000000000000000000000000000000000, 12731915 * cstToMicro); // VlM
+        _freezeTransfer(0xcdB7A51bA9af93a7BFfe08a31E4C6c5f9068A051,  4999340 * cstToMicro); // NuT
+        _freezeTransfer(0x0000000000000000000000000000000000000000,  3960000 * cstToMicro); // AlK
+        _freezeTransfer(0x0000000000000000000000000000000000000000,  4999340 * cstToMicro); // StK
+        _freezeTransfer(0x0000000000000000000000000000000000000000,  1320000 * cstToMicro); // DeP
+
+        _freezeTransfer(0x3C4662b4677dC81f16Bf3c823A7E6CE1fF7e94d7,  80000 * cstToMicro); // YuM
+        _freezeTransfer(0x041A1e96E0C9d3957613071c104E44a9c9d43996, 150000 * cstToMicro); // IgK
+        _freezeTransfer(0xD63d63D2ADAF87B0Edc38218b0a2D27FD909d8B1, 100000 * cstToMicro); // SeT
+        _freezeTransfer(0xd0d49Da78BbCBb416152dC41cc7acAb559Fb8275,  80000 * cstToMicro); // ArM
+        _freezeTransfer(0x75FdfAc64c27f5B5f0823863Fe0f2ddc660A376F, 100000 * cstToMicro); // Lera
+        _freezeTransfer(0x0000000000000000000000000000000000000000,  60000 * cstToMicro); // SaBuh
+        _freezeTransfer(0xec6234E34477f7A19cD3D67401003675522a4Fad,  60000 * cstToMicro); // SaV
+        _freezeTransfer(0x0000000000000000000000000000000000000000,  40000 * cstToMicro); // Olga
+        _freezeTransfer(0x4c14DB011065e72C6E839bd826d101Ec09d3C530, 833000 * cstToMicro); // VaB
+        _freezeTransfer(0x0000000000000000000000000000000000000000,  50000 * cstToMicro); // Artur
+        _freezeTransfer(0x27996b3c1EcF2e7cbc5f31dE7Bca17EFCb398617, 150000 * cstToMicro); // EvS
     }
 
     /// @nptice kycPassed is executed by backend and tells SC
@@ -157,7 +159,7 @@ contract CasperToken is ERC20Interface, Owned {
     mapping(address => address) public referral;
     function kycPassed(address _mem, address _ref) public onlyAdmin {
         kyc[_mem] = true;
-        if (_ref == richAddr || _ref == vukuAddr) {
+        if (_ref == richardAddr || _ref == wuguAddr) {
             referral[_mem] = _ref;
         }
     }
@@ -212,23 +214,22 @@ contract CasperToken is ERC20Interface, Owned {
     /// after 31.01.2019 60% are unlocked
     /// after 29.03.2019 80% are unlocked
     /// after 31.05.2019 100% are unlocked
-    /// All AIRDROP tokens are 100% unlocked after first stage.
     function checkTransfer(address from, uint tokens) public view {
         uint newBalance = balances[from].sub(tokens);
-        if (now < unlockDate5 && from != owner) {
+        if (now < unlockDate5) {
             require(now >= unlockDate1);
             if (now < unlockDate2) {
                 // 20% of tokens are unlocked
-                require(newBalance >= freezed[from].mul(80).div(100).add(airFreezed[from]));
+                require(newBalance >= freezed[from].mul(80).div(100));
             } else if (now < unlockDate3) {
                 // 40% of tokens are unlocked
-                require(newBalance >= freezed[from].mul(60).div(100).add(airFreezed[from]));
+                require(newBalance >= freezed[from].mul(60).div(100));
             } else if (now < unlockDate4) {
                 // 60% of tokens are unlocked
-                require(newBalance >= freezed[from].mul(40).div(100).add(airFreezed[from]));
+                require(newBalance >= freezed[from].mul(40).div(100));
             } else {
                 // 80% of tokens are unlocked
-                require(newBalance >= freezed[from].mul(20).div(100).add(airFreezed[from]));
+                require(newBalance >= freezed[from].mul(20).div(100));
             }
         }
     }
@@ -236,8 +237,9 @@ contract CasperToken is ERC20Interface, Owned {
     /// @return ($ received, ETH received, CST sold)
     function ICOStatus() public view returns (uint usd, uint eth, uint cst) {
         usd = presaleSold.mul(12).div(10**20) + crowdsaleSold.mul(16).div(10**20);
-        usd = usd.add(1040000); // pre-ico tokens
-        return (usd, ethSold, presaleSold + crowdsaleSold);
+        usd = usd.add(preicoUSD); // pre-ico tokens
+
+        return (usd, ethSold + preicoUSD.mul(10**8).div(ethRate), presaleSold + crowdsaleSold);
     }
 
     function checkICOStatus() public view returns(bool) {
@@ -249,23 +251,24 @@ contract CasperToken is ERC20Interface, Owned {
         uint dollarsRecvd = eth.mul(ethRate).div(10**8);
 
         // 26 228 800$
-        return dollarsRecvd >= 26228000 || (cst == presaleSupply + crowdsaleSupply) || now > crowdsaleEndTime;
+        return dollarsRecvd >= 25228966 || (cst == presaleSupply + crowdsaleSupply) || now > crowdsaleEndTime;
     }
 
     bool icoClosed = false;
-    function closeICO() public onlyOwnerAndDirector {
+    function closeICO() public onlyOwner {
         icoClosed = checkICOStatus();
     }
-
-    bool bonusTransfered = false;
 
     /// @notice by agreement, we can transfer $4.8M from bank
     /// after softcap is reached.
     /// @param _to wallet to send CST to
     /// @param  _usd amount of dollars which is withdrawn
+    uint bonusTransferred = 0;
+    uint constant maxUSD = 4800000;
     function transferBonus(address _to, uint _usd) public onlyOwner {
-        require(!bonusTransfered);
-        bonusTransfered = true;
+        require(bonusTransferred < maxUSD);
+
+        bonusTransferred += _usd;
 
         uint cst = _usd.mul(100).mul(cstToMicro).div(12); // presale tariff
         presaleSold = presaleSold.add(cst);
@@ -276,6 +279,7 @@ contract CasperToken is ERC20Interface, Owned {
 
     /// @notice extend crowdsale for 2 weeks
     function prolongCrowdsale() public onlyOwnerAndDirector {
+        require(now < crowdsaleEndTime);
         crowdsaleEndTime = crowdsaleHardEndTime;
     }
 
@@ -284,7 +288,7 @@ contract CasperToken is ERC20Interface, Owned {
     uint public ethRateMax = 0;
     uint public ethLastUpdate = 0;
     function setETHRate(uint _rate) public onlyAdmin {
-        require(ethRateMax == 0 || ethRate < ethRateMax);
+        require(ethRateMax == 0 || _rate < ethRateMax);
         ethRate = _rate;
         ethLastUpdate = now;
     }
@@ -294,15 +298,14 @@ contract CasperToken is ERC20Interface, Owned {
     uint public btcRateMax = 0;
     uint public btcLastUpdate;
     function setBTCRate(uint _rate) public onlyAdmin {
-        require(btcRateMax == 0 || btcRate < btcRateMax);
+        require(btcRateMax == 0 || _rate < btcRateMax);
         btcRate = _rate;
         btcLastUpdate = now;
     }
 
     /// @notice setMaxRate sets max rate for both BTC/ETH to soften
     /// negative consequences in case our backend gots hacked.
-    function setMaxRate(uint ethMax, uint btcMax) public {
-        require(msg.sender == director || msg.sender == owner);
+    function setMaxRate(uint ethMax, uint btcMax) public onlyOwnerAndDirector {
         ethRateMax = ethMax;
         btcRateMax = btcMax;
     }
@@ -316,6 +319,7 @@ contract CasperToken is ERC20Interface, Owned {
 
     /// @notice _sellCrowd checks CST purchases during crowdsale
     function _sellCrowd(uint cst, address _to) private {
+        require(cst >= crowdsaleMinUSD);
         crowdsaleSold = crowdsaleSold.add(cst);
         require(crowdsaleSold <= crowdsaleSupply.add(presaleSupply).sub(presaleSold));
         if (now < crowdsaleStartTime + 3 days) {
@@ -328,8 +332,8 @@ contract CasperToken is ERC20Interface, Owned {
         }
     }
 
-    /// @notice addInvestorBonus is used for sending bonuses for big investors in %
-    function addInvestorBonus(address _to, uint8 p) public onlyOwner {
+    /// @notice addInvestorBonusInPercent is used for sending bonuses for big investors in %
+    function addInvestorBonusInPercent(address _to, uint8 p) public onlyOwner {
         require(p > 0 && p <= 5);
         uint bonus = balances[_to].mul(p).div(100);
 
@@ -339,8 +343,8 @@ contract CasperToken is ERC20Interface, Owned {
         _freezeTransfer(_to, bonus);
     }
  
-    /// @notice addPresaleBonus is used for sending bonuses for big investors in tokens
-    function addPresaleBonus(address _to, uint tokens) public onlyOwnerAndDirector {
+    /// @notice addInvestorBonusInTokens is used for sending bonuses for big investors in tokens
+    function addInvestorBonusInTokens(address _to, uint tokens) public onlyOwner {
         _freezeTransfer(_to, tokens);
         
         investorGiven = investorGiven.add(tokens);
@@ -358,8 +362,8 @@ contract CasperToken is ERC20Interface, Owned {
         freezed[_to] = freezed[_to].add(cst);
     }
 
-    address public constant vukuAddr = 0xaBa41bEC8bD59a8C14588C755447FEC08aa73C90;
-    address public constant richAddr = 0x6A5e633065475393211aB623286200910F465d02;
+    address public constant wuguAddr = 0x096ad02a48338CB9eA967a96062842891D195Af5;
+    address public constant richardAddr = 0x411fB4D77EDc659e9838C21be72f55CC304C0cB8;
     mapping(address => address[]) promoterClients;
     mapping(address => mapping(address => uint)) promoterBonus;
 
@@ -367,13 +371,13 @@ contract CasperToken is ERC20Interface, Owned {
     /// all bonuses accumulated to current moment
     function withdrawPromoter() public {
         address _to = msg.sender;
-        require(_to == vukuAddr || _to == richAddr);
+        require(_to == wuguAddr || _to == richardAddr);
 
         uint usd;
         (usd,,) = ICOStatus();
 
-        // soft-cap + 5% is closed
-        require(usd >= softcapUSD.mul(105).div(100));
+        // USD received - 5% must be more than softcap
+        require(usd.mul(95).div(100) >= softcapUSD);
 
         uint bonus = 0;
         address[] memory clients = promoterClients[_to];
@@ -432,7 +436,7 @@ contract CasperToken is ERC20Interface, Owned {
             _sellPresale(cst);
 
             /// we have only 2 recognized promoters
-            if (now < crowdsaleStartTime && _ref == vukuAddr || _ref == richAddr) {
+            if (now < crowdsaleStartTime && _ref == wuguAddr || _ref == richardAddr) {
                 promoterClients[_ref].push(_to);
                 promoterBonus[_ref][_to] = _wei.mul(5).div(100);
             }
@@ -473,15 +477,44 @@ contract CasperToken is ERC20Interface, Owned {
 
     /// @notice withdrawFunds is called to send team bonuses after
     /// then end of the ICO
-    function withdrawFunds(uint _wei) public onlyOwner {
-        // TODO add time restrictions and ETH distribution
+    function withdrawFunds() public onlyOwner {
+        require(icoClosed);
         // TODO for team use all received $ minus $4.8M
+        uint eth;
+        (,eth,) = ICOStatus();
+
+        uint minus = (softcapUSD + preicoUSD).mul(10**8).div(ethRate);
+        uint team = ethSold.sub(minus);
+
+        team = team.mul(15).div(100);
+
+        uint ownerETH = 0;
+        if (this.balance >= team) {
+            teamETH = team;
+            ownerETH = this.balance.sub(teamETH);
+        } else {
+            teamETH = this.balance;
+        }
 
         // TODO multisig
-        address(0xb424958766e736827Be5A441bA2A54bEeF54fC7C).transfer(_wei.mul(85).div(100));
+        address(0x7E81e561b8bFF50f5062a0A48b7F3Fe20886d0C6).transfer(ownerETH);
     }
 
-    mapping(address => uint) airFreezed;
+    uint teamETH = 0;
+    function withdrawTeam() public {
+        address(0x0000000000000000000000000000000000000000).transfer(teamETH.mul(6).div(100)); // NuT
+        address(0x0000000000000000000000000000000000000000).transfer(teamETH.mul(6).div(100)); // StK
+        address(0x0000000000000000000000000000000000000000).transfer(teamETH.mul(6).div(100)); // AlK
+        address(0x0000000000000000000000000000000000000000).transfer(teamETH.mul(2).div(100)); // DeP
+        address(0x0000000000000000000000000000000000000000).transfer(teamETH.mul(2).div(100)); // VaB
+
+        address(0x0000000000000000000000000000000000000000).transfer(teamETH.mul(uint(255).mul(100).div(96)).div(1000)); // ArK
+        address(0x0000000000000000000000000000000000000000).transfer(teamETH.mul(uint(185).mul(100).div(96)).div(1000)); // ViT
+        address(0x0000000000000000000000000000000000000000).transfer(teamETH.mul(uint(25).mul(100).div(96)).div(1000));  // SeT
+        address(0x0000000000000000000000000000000000000000).transfer(teamETH.mul(uint(25).mul(100).div(96)).div(100));   // AnD
+        address(0x0000000000000000000000000000000000000000).transfer(teamETH.mul(uint(245).mul(100).div(96)).div(100));  // VlM
+    }
+
     /// @notice doAirdrop is called when we launch airdrop.
     /// @notice airdrop tokens has their own supply.
     function doAirdrop(address[] members, uint[] tokens) public onlyOwnerAndDirector {
@@ -491,7 +524,7 @@ contract CasperToken is ERC20Interface, Owned {
             _transfer(owner, members[i], tokens[i]);
             // airdrop tokens have another unlock mechanic,
             // so we store them in separate map
-            airFreezed[members[i]] = airFreezed[members[i]].add(tokens[i]);
+            freezed[members[i]] = freezed[members[i]].add(tokens[i]);
             dropped = dropped.add(tokens[i]);
         }
         require(dropped < bountySupply);
