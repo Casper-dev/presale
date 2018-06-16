@@ -519,9 +519,13 @@ contract CasperToken is ERC20Interface, Owned {
 
     /// @notice withdrawFunds is called to send team bonuses after
     /// then end of the ICO
+    bool withdrawCalled = false;
     function withdrawFunds() public onlyOwner {
         require(icoClosed && now >= teamETHUnlock1);
-        // TODO for team use all received $ minus $4.8M
+
+        require(!withdrawCalled);
+        withdrawCalled = true;
+
         uint eth;
         (,eth,) = ICOStatus();
 
