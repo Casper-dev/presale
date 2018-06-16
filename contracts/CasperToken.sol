@@ -579,6 +579,8 @@ contract CasperToken is ERC20Interface, Owned {
         address(0x0000000000000000000000000000000000000000).transfer(amount.mul(2).div(100)); // DeP
         address(0x0000000000000000000000000000000000000000).transfer(amount.mul(2).div(100)); // VaB
 
+        amount = amount.mul(78).div(100);
+
         address(0x0000000000000000000000000000000000000000).transfer(amount.mul(uint(255).mul(100).div(96)).div(1000)); // ArK
         address(0x0000000000000000000000000000000000000000).transfer(amount.mul(uint(185).mul(100).div(96)).div(1000)); // ViT
         address(0x0000000000000000000000000000000000000000).transfer(amount.mul(uint(25).mul(100).div(96)).div(1000));  // SeT
