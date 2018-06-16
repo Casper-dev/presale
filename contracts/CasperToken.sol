@@ -590,17 +590,15 @@ contract CasperToken is ERC20Interface, Owned {
 
     /// @notice doAirdrop is called when we launch airdrop.
     /// @notice airdrop tokens has their own supply.
+    uint dropped = 0;
     function doAirdrop(address[] members, uint[] tokens) public onlyOwnerAndDirector {
         require(members.length == tokens.length);
-        uint dropped = 0;
+    
         for(uint i = 0; i < members.length; i++) {
-            _transfer(owner, members[i], tokens[i]);
-            // airdrop tokens have another unlock mechanic,
-            // so we store them in separate map
-            freezed[members[i]] = freezed[members[i]].add(tokens[i]);
+            _freezeTransfer(members[i], tokens[i]);
             dropped = dropped.add(tokens[i]);
         }
-        require(dropped < bountySupply);
+        require(dropped <= bountySupply);
     }
 
     mapping(address => uint) public whitemap;
@@ -612,7 +610,7 @@ contract CasperToken is ERC20Interface, Owned {
         require(_mem.length == _tokens.length);
         for(uint i = 0; i < _mem.length; i++) {
             whitemap[_mem[i]] = _tokens[i];
-            whitelistTokens.add(_tokens[i]);
+            whitelistTokens = whitelistTokens.sub(whitemap[_mem[i]]).add(_tokens[i]);
         }
     }
 
