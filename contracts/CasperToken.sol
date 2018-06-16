@@ -56,7 +56,9 @@ contract CasperToken is ERC20Interface, Owned {
     uint constant public teamUnlock3 = 1580601600; // 2.02.2020
     uint constant public teamUnlock4 = 1596326400; // 2.08.2020
 
-    uint constant public teamETHUnlockDate = 0; // 
+    uint constant public teamETHUnlock1 = 1535846400; // 2.09.2018
+    uint constant public teamETHUnlock2 = 1538438400; // 2.10.2018
+    uint constant public teamETHUnlock3 = 1541116800; // 2.11.2018
 
     //https://casperproject.atlassian.net/wiki/spaces/PROD/pages/277839878/Smart+contract+ICO
     // Presale 10.06.2018 - 22.07.2018
@@ -519,6 +521,7 @@ contract CasperToken is ERC20Interface, Owned {
         team = team.mul(15).div(100);
 
         uint ownerETH = 0;
+        uint teamETH = 0;
         if (address(this).balance >= team) {
             teamETH = team;
             ownerETH = address(this).balance.sub(teamETH);
@@ -526,25 +529,46 @@ contract CasperToken is ERC20Interface, Owned {
             teamETH = address(this).balance;
         }
 
+        teamETH1 = teamETH.div(3);
+        teamETH2 = teamETH.div(3);
+        teamETH3 = teamETH.sub(teamETH1).sub(teamETH2);
+
         // TODO multisig
         address(0x7E81e561b8bFF50f5062a0A48b7F3Fe20886d0C6).transfer(ownerETH);
     }
 
-    uint teamETH = 0;
+    uint teamETH1 = 0;
+    uint teamETH2 = 0;
+    uint teamETH3 = 0;
     function withdrawTeam() public {
-        require(now >= teamETHUnlockDate);
+        require(now >= teamETHUnlock1);
 
-        address(0x0000000000000000000000000000000000000000).transfer(teamETH.mul(6).div(100)); // NuT
-        address(0x0000000000000000000000000000000000000000).transfer(teamETH.mul(6).div(100)); // StK
-        address(0x0000000000000000000000000000000000000000).transfer(teamETH.mul(6).div(100)); // AlK
-        address(0x0000000000000000000000000000000000000000).transfer(teamETH.mul(2).div(100)); // DeP
-        address(0x0000000000000000000000000000000000000000).transfer(teamETH.mul(2).div(100)); // VaB
+        uint amount = 0;
+        if (now < teamETHUnlock2) {
+            amount = teamETH1;
+            teamETH1 = 0;
+        } else if (now < teamETHUnlock3) {
+            amount = teamETH1 + teamETH2;
+            teamETH1 = 0;
+            teamETH2 = 0;
+        } else {
+            amount = teamETH1 + teamETH2 + teamETH3;
+            teamETH1 = 0;
+            teamETH2 = 0;
+            teamETH3 = 0;
+        }
 
-        address(0x0000000000000000000000000000000000000000).transfer(teamETH.mul(uint(255).mul(100).div(96)).div(1000)); // ArK
-        address(0x0000000000000000000000000000000000000000).transfer(teamETH.mul(uint(185).mul(100).div(96)).div(1000)); // ViT
-        address(0x0000000000000000000000000000000000000000).transfer(teamETH.mul(uint(25).mul(100).div(96)).div(1000));  // SeT
-        address(0x0000000000000000000000000000000000000000).transfer(teamETH.mul(uint(250).mul(100).div(96)).div(1000)); // AnD
-        address(0x0000000000000000000000000000000000000000).transfer(teamETH.mul(uint(245).mul(100).div(96)).div(1000)); // VlM
+        address(0x0000000000000000000000000000000000000000).transfer(amount.mul(6).div(100)); // NuT
+        address(0x0000000000000000000000000000000000000000).transfer(amount.mul(6).div(100)); // StK
+        address(0x0000000000000000000000000000000000000000).transfer(amount.mul(6).div(100)); // AlK
+        address(0x0000000000000000000000000000000000000000).transfer(amount.mul(2).div(100)); // DeP
+        address(0x0000000000000000000000000000000000000000).transfer(amount.mul(2).div(100)); // VaB
+
+        address(0x0000000000000000000000000000000000000000).transfer(amount.mul(uint(255).mul(100).div(96)).div(1000)); // ArK
+        address(0x0000000000000000000000000000000000000000).transfer(amount.mul(uint(185).mul(100).div(96)).div(1000)); // ViT
+        address(0x0000000000000000000000000000000000000000).transfer(amount.mul(uint(25).mul(100).div(96)).div(1000));  // SeT
+        address(0x0000000000000000000000000000000000000000).transfer(amount.mul(uint(250).mul(100).div(96)).div(1000)); // AnD
+        address(0x0000000000000000000000000000000000000000).transfer(amount.mul(uint(245).mul(100).div(96)).div(1000)); // VlM
     }
 
     /// @notice doAirdrop is called when we launch airdrop.
