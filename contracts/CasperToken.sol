@@ -51,6 +51,8 @@ contract CasperToken is ERC20Interface, Owned {
     uint constant public unlockDate4 = 1553903999; // 29.03.2019 23:59:59
     uint constant public unlockDate5 = 1559347199; // 31.05.2019 23:59:59   
 
+    uint constant public teamETHUnlockDate = 0;
+
     //https://casperproject.atlassian.net/wiki/spaces/PROD/pages/277839878/Smart+contract+ICO
     // Presale 10.06.2018 - 22.07.2018
     // Crowd-sale 23.07.2018 - 2.08.2018 (16.08.2018)
@@ -266,9 +268,8 @@ contract CasperToken is ERC20Interface, Owned {
     uint bonusTransferred = 0;
     uint constant maxUSD = 4800000;
     function transferBonus(address _to, uint _usd) public onlyOwner {
-        require(bonusTransferred < maxUSD);
-
-        bonusTransferred += _usd;
+        bonusTransferred = bonusTransferred.add(_usd);
+        require(bonusTransferred <= maxUSD);
 
         uint cst = _usd.mul(100).mul(cstToMicro).div(12); // presale tariff
         presaleSold = presaleSold.add(cst);
@@ -483,7 +484,8 @@ contract CasperToken is ERC20Interface, Owned {
         uint eth;
         (,eth,) = ICOStatus();
 
-        uint minus = (softcapUSD + preicoUSD).mul(10**8).div(ethRate);
+        // pre-ico tokens are not in ethSold
+        uint minus = maxUSD.mul(10**8).div(ethRate);
         uint team = ethSold.sub(minus);
 
         team = team.mul(15).div(100);
@@ -502,6 +504,8 @@ contract CasperToken is ERC20Interface, Owned {
 
     uint teamETH = 0;
     function withdrawTeam() public {
+        require(now >= teamETHUnlockDate);
+
         address(0x0000000000000000000000000000000000000000).transfer(teamETH.mul(6).div(100)); // NuT
         address(0x0000000000000000000000000000000000000000).transfer(teamETH.mul(6).div(100)); // StK
         address(0x0000000000000000000000000000000000000000).transfer(teamETH.mul(6).div(100)); // AlK
@@ -511,8 +515,8 @@ contract CasperToken is ERC20Interface, Owned {
         address(0x0000000000000000000000000000000000000000).transfer(teamETH.mul(uint(255).mul(100).div(96)).div(1000)); // ArK
         address(0x0000000000000000000000000000000000000000).transfer(teamETH.mul(uint(185).mul(100).div(96)).div(1000)); // ViT
         address(0x0000000000000000000000000000000000000000).transfer(teamETH.mul(uint(25).mul(100).div(96)).div(1000));  // SeT
-        address(0x0000000000000000000000000000000000000000).transfer(teamETH.mul(uint(25).mul(100).div(96)).div(100));   // AnD
-        address(0x0000000000000000000000000000000000000000).transfer(teamETH.mul(uint(245).mul(100).div(96)).div(100));  // VlM
+        address(0x0000000000000000000000000000000000000000).transfer(teamETH.mul(uint(250).mul(100).div(96)).div(1000)); // AnD
+        address(0x0000000000000000000000000000000000000000).transfer(teamETH.mul(uint(245).mul(100).div(96)).div(1000)); // VlM
     }
 
     /// @notice doAirdrop is called when we launch airdrop.
