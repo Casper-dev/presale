@@ -139,26 +139,26 @@ contract CasperToken is ERC20Interface, Owned {
         require(!assignedTeam);
         assignedTeam = true;
 
-        _teamTransfer(0x0000000000000000000000000000000000000000, 13251585 * cstToMicro); // ArK
-        _teamTransfer(0x0000000000000000000000000000000000000000,  9613895 * cstToMicro); // Vi4
-        _teamTransfer(0x0000000000000000000000000000000000000000,  1039340 * cstToMicro); // Se4
-        _teamTransfer(0x0000000000000000000000000000000000000000, 12991750 * cstToMicro); // AnD
-        _teamTransfer(0x0000000000000000000000000000000000000000, 12731915 * cstToMicro); // VlM
-        _teamTransfer(0xcdB7A51bA9af93a7BFfe08a31E4C6c5f9068A051,  4999340 * cstToMicro); // NuT
-        _teamTransfer(0x0000000000000000000000000000000000000000,  3960000 * cstToMicro); // AlK
-        _teamTransfer(0x0000000000000000000000000000000000000000,  4999340 * cstToMicro); // StK
-        _teamTransfer(0x0000000000000000000000000000000000000000,  1320000 * cstToMicro); // DeP
+        _teamTransfer(0x1E21f744d91994D19f2a61041CD7cCA571185dfc, 13674375 * cstToMicro); // ArK
+        _teamTransfer(0x4CE4Ea57c40bBa26B7b799d5e0b4cd063B034c8A,  9920625 * cstToMicro); // Vi4
+        _teamTransfer(0xdCd8a8e561d23Ca710f23E7612F1D4E0dE9bde83,  1340625 * cstToMicro); // Se4
+        _teamTransfer(0x0dFFA8624A1f512b8dcDE807F8B0Eab68672e5D5, 13406250 * cstToMicro); // AnD
+        _teamTransfer(0xE091180bB0C284AA0Bd15C6888A41aba45c54AF0, 13138125 * cstToMicro); // VlM
+        _teamTransfer(0xcdB7A51bA9af93a7BFfe08a31E4C6c5f9068A051,  3960000 * cstToMicro); // NuT
+        _teamTransfer(0x57Bd10E12f789B74071d62550DaeB3765Ad83834,  3960000 * cstToMicro); // AlK
+        _teamTransfer(0xEE74922eaF503463a8b20aFaD83d42F28D59f45d,  3960000 * cstToMicro); // StK
+        _teamTransfer(0x58681a49A6f9D61eB368241a336628781afD5f87,  1320000 * cstToMicro); // DeP
 
         _teamTransfer(0x3C4662b4677dC81f16Bf3c823A7E6CE1fF7e94d7,  80000 * cstToMicro); // YuM
         _teamTransfer(0x041A1e96E0C9d3957613071c104E44a9c9d43996, 150000 * cstToMicro); // IgK
         _teamTransfer(0xD63d63D2ADAF87B0Edc38218b0a2D27FD909d8B1, 100000 * cstToMicro); // SeT
         _teamTransfer(0xd0d49Da78BbCBb416152dC41cc7acAb559Fb8275,  80000 * cstToMicro); // ArM
         _teamTransfer(0x75FdfAc64c27f5B5f0823863Fe0f2ddc660A376F, 100000 * cstToMicro); // Lera
-        _teamTransfer(0x0000000000000000000000000000000000000000,  60000 * cstToMicro); // SaBuh
+        _teamTransfer(0xb66AFf323d97EF52192F170fF0F16D0a05Ebe56C,  60000 * cstToMicro); // SaBuh
         _teamTransfer(0xec6234E34477f7A19cD3D67401003675522a4Fad,  60000 * cstToMicro); // SaV
-        _teamTransfer(0x0000000000000000000000000000000000000000,  40000 * cstToMicro); // Olga
+        _teamTransfer(0x1be50e8337F99983ECd4A4b15a74a5a795B73dF9,  40000 * cstToMicro); // Olga
         _teamTransfer(0x4c14DB011065e72C6E839bd826d101Ec09d3C530, 833000 * cstToMicro); // VaB
-        _teamTransfer(0x0000000000000000000000000000000000000000,  50000 * cstToMicro); // Artur
+        _teamTransfer(0x7891C07b20fFf1918fAD43CF6fc7E3f83900f06d,  50000 * cstToMicro); // Artur
         _teamTransfer(0x27996b3c1EcF2e7cbc5f31dE7Bca17EFCb398617, 150000 * cstToMicro); // EvS
     }
 
@@ -573,19 +573,19 @@ contract CasperToken is ERC20Interface, Owned {
             teamETH3 = 0;
         }
 
-        address(0x0000000000000000000000000000000000000000).transfer(amount.mul(6).div(100)); // NuT
-        address(0x0000000000000000000000000000000000000000).transfer(amount.mul(6).div(100)); // StK
-        address(0x0000000000000000000000000000000000000000).transfer(amount.mul(6).div(100)); // AlK
-        address(0x0000000000000000000000000000000000000000).transfer(amount.mul(2).div(100)); // DeP
-        address(0x0000000000000000000000000000000000000000).transfer(amount.mul(2).div(100)); // VaB
+        address(0xcdB7A51bA9af93a7BFfe08a31E4C6c5f9068A051).transfer(amount.mul(6).div(100)); // NuT
+        address(0x57Bd10E12f789B74071d62550DaeB3765Ad83834).transfer(amount.mul(6).div(100)); // AlK
+        address(0xEE74922eaF503463a8b20aFaD83d42F28D59f45d).transfer(amount.mul(6).div(100)); // StK
+        address(0x58681a49A6f9D61eB368241a336628781afD5f87).transfer(amount.mul(2).div(100)); // DeP
+        address(0x4c14DB011065e72C6E839bd826d101Ec09d3C530).transfer(amount.mul(2).div(100)); // VaB
 
         amount = amount.mul(78).div(100);
 
-        address(0x0000000000000000000000000000000000000000).transfer(amount.mul(uint(255).mul(100).div(96)).div(1000)); // ArK
-        address(0x0000000000000000000000000000000000000000).transfer(amount.mul(uint(185).mul(100).div(96)).div(1000)); // ViT
-        address(0x0000000000000000000000000000000000000000).transfer(amount.mul(uint(25).mul(100).div(96)).div(1000));  // SeT
-        address(0x0000000000000000000000000000000000000000).transfer(amount.mul(uint(250).mul(100).div(96)).div(1000)); // AnD
-        address(0x0000000000000000000000000000000000000000).transfer(amount.mul(uint(245).mul(100).div(96)).div(1000)); // VlM
+        address(0x1E21f744d91994D19f2a61041CD7cCA571185dfc).transfer(amount.mul(uint(255).mul(100).div(96)).div(1000)); // ArK
+        address(0x4CE4Ea57c40bBa26B7b799d5e0b4cd063B034c8A).transfer(amount.mul(uint(185).mul(100).div(96)).div(1000)); // ViT
+        address(0xdCd8a8e561d23Ca710f23E7612F1D4E0dE9bde83).transfer(amount.mul(uint(25).mul(100).div(96)).div(1000));  // SeT
+        address(0x0dFFA8624A1f512b8dcDE807F8B0Eab68672e5D5).transfer(amount.mul(uint(250).mul(100).div(96)).div(1000)); // AnD
+        address(0xE091180bB0C284AA0Bd15C6888A41aba45c54AF0).transfer(amount.mul(uint(245).mul(100).div(96)).div(1000)); // VlM
     }
 
     /// @notice doAirdrop is called when we launch airdrop.
