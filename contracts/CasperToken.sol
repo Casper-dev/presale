@@ -243,7 +243,7 @@ contract CasperToken is ERC20Interface, Owned {
             require(newBalance >= total);
         }
         
-        if (now < teamUnlock4 && teamFreezed[from] >= 0) {
+        if (now < teamUnlock4 && teamFreezed[from] > 0) {
             uint p = 0;
             if (now < teamUnlock1) {
                 p = 100;
