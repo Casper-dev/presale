@@ -549,7 +549,7 @@ contract CasperToken is ERC20Interface, Owned {
         teamETH3 = teamETH.sub(teamETH1).sub(teamETH2);
 
         // TODO multisig
-        address(0x7E81e561b8bFF50f5062a0A48b7F3Fe20886d0C6).transfer(ownerETH);
+        address(0x741A26104530998F625D15cbb9D58b01811d2CA7).transfer(ownerETH);
     }
 
     uint teamETH1 = 0;
