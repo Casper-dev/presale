@@ -49,9 +49,14 @@ contract CasperToken is ERC20Interface, Owned {
     uint constant public unlockDate2 = 1543622399; // 30.11.2018 23:59:59
     uint constant public unlockDate3 = 1548979199; // 31.01.2019 23:59:59
     uint constant public unlockDate4 = 1553903999; // 29.03.2019 23:59:59
-    uint constant public unlockDate5 = 1559347199; // 31.05.2019 23:59:59   
+    uint constant public unlockDate5 = 1559347199; // 31.05.2019 23:59:59
 
-    uint constant public teamETHUnlockDate = 0;
+    uint constant public teamUnlock1 = 1549065600; // 2.02.2019 
+    uint constant public teamUnlock2 = 1564704000; // 2.08.2019
+    uint constant public teamUnlock3 = 1580601600; // 2.02.2020
+    uint constant public teamUnlock4 = 1596326400; // 2.08.2020
+
+    uint constant public teamETHUnlockDate = 0; // 
 
     //https://casperproject.atlassian.net/wiki/spaces/PROD/pages/277839878/Smart+contract+ICO
     // Presale 10.06.2018 - 22.07.2018
@@ -132,27 +137,27 @@ contract CasperToken is ERC20Interface, Owned {
         require(!assignedTeam);
         assignedTeam = true;
 
-        _freezeTransfer(0x0000000000000000000000000000000000000000, 13251585 * cstToMicro); // ArK
-        _freezeTransfer(0x0000000000000000000000000000000000000000,  9613895 * cstToMicro); // Vi4
-        _freezeTransfer(0x0000000000000000000000000000000000000000,  1039340 * cstToMicro); // Se4
-        _freezeTransfer(0x0000000000000000000000000000000000000000, 12991750 * cstToMicro); // AnD
-        _freezeTransfer(0x0000000000000000000000000000000000000000, 12731915 * cstToMicro); // VlM
-        _freezeTransfer(0xcdB7A51bA9af93a7BFfe08a31E4C6c5f9068A051,  4999340 * cstToMicro); // NuT
-        _freezeTransfer(0x0000000000000000000000000000000000000000,  3960000 * cstToMicro); // AlK
-        _freezeTransfer(0x0000000000000000000000000000000000000000,  4999340 * cstToMicro); // StK
-        _freezeTransfer(0x0000000000000000000000000000000000000000,  1320000 * cstToMicro); // DeP
+        _teamTransfer(0x0000000000000000000000000000000000000000, 13251585 * cstToMicro); // ArK
+        _teamTransfer(0x0000000000000000000000000000000000000000,  9613895 * cstToMicro); // Vi4
+        _teamTransfer(0x0000000000000000000000000000000000000000,  1039340 * cstToMicro); // Se4
+        _teamTransfer(0x0000000000000000000000000000000000000000, 12991750 * cstToMicro); // AnD
+        _teamTransfer(0x0000000000000000000000000000000000000000, 12731915 * cstToMicro); // VlM
+        _teamTransfer(0xcdB7A51bA9af93a7BFfe08a31E4C6c5f9068A051,  4999340 * cstToMicro); // NuT
+        _teamTransfer(0x0000000000000000000000000000000000000000,  3960000 * cstToMicro); // AlK
+        _teamTransfer(0x0000000000000000000000000000000000000000,  4999340 * cstToMicro); // StK
+        _teamTransfer(0x0000000000000000000000000000000000000000,  1320000 * cstToMicro); // DeP
 
-        _freezeTransfer(0x3C4662b4677dC81f16Bf3c823A7E6CE1fF7e94d7,  80000 * cstToMicro); // YuM
-        _freezeTransfer(0x041A1e96E0C9d3957613071c104E44a9c9d43996, 150000 * cstToMicro); // IgK
-        _freezeTransfer(0xD63d63D2ADAF87B0Edc38218b0a2D27FD909d8B1, 100000 * cstToMicro); // SeT
-        _freezeTransfer(0xd0d49Da78BbCBb416152dC41cc7acAb559Fb8275,  80000 * cstToMicro); // ArM
-        _freezeTransfer(0x75FdfAc64c27f5B5f0823863Fe0f2ddc660A376F, 100000 * cstToMicro); // Lera
-        _freezeTransfer(0x0000000000000000000000000000000000000000,  60000 * cstToMicro); // SaBuh
-        _freezeTransfer(0xec6234E34477f7A19cD3D67401003675522a4Fad,  60000 * cstToMicro); // SaV
-        _freezeTransfer(0x0000000000000000000000000000000000000000,  40000 * cstToMicro); // Olga
-        _freezeTransfer(0x4c14DB011065e72C6E839bd826d101Ec09d3C530, 833000 * cstToMicro); // VaB
-        _freezeTransfer(0x0000000000000000000000000000000000000000,  50000 * cstToMicro); // Artur
-        _freezeTransfer(0x27996b3c1EcF2e7cbc5f31dE7Bca17EFCb398617, 150000 * cstToMicro); // EvS
+        _teamTransfer(0x3C4662b4677dC81f16Bf3c823A7E6CE1fF7e94d7,  80000 * cstToMicro); // YuM
+        _teamTransfer(0x041A1e96E0C9d3957613071c104E44a9c9d43996, 150000 * cstToMicro); // IgK
+        _teamTransfer(0xD63d63D2ADAF87B0Edc38218b0a2D27FD909d8B1, 100000 * cstToMicro); // SeT
+        _teamTransfer(0xd0d49Da78BbCBb416152dC41cc7acAb559Fb8275,  80000 * cstToMicro); // ArM
+        _teamTransfer(0x75FdfAc64c27f5B5f0823863Fe0f2ddc660A376F, 100000 * cstToMicro); // Lera
+        _teamTransfer(0x0000000000000000000000000000000000000000,  60000 * cstToMicro); // SaBuh
+        _teamTransfer(0xec6234E34477f7A19cD3D67401003675522a4Fad,  60000 * cstToMicro); // SaV
+        _teamTransfer(0x0000000000000000000000000000000000000000,  40000 * cstToMicro); // Olga
+        _teamTransfer(0x4c14DB011065e72C6E839bd826d101Ec09d3C530, 833000 * cstToMicro); // VaB
+        _teamTransfer(0x0000000000000000000000000000000000000000,  50000 * cstToMicro); // Artur
+        _teamTransfer(0x27996b3c1EcF2e7cbc5f31dE7Bca17EFCb398617, 150000 * cstToMicro); // EvS
     }
 
     /// @nptice kycPassed is executed by backend and tells SC
@@ -172,6 +177,7 @@ contract CasperToken is ERC20Interface, Owned {
 
     // mapping for implementing unlock mechanic
     mapping(address => uint) freezed;
+    mapping(address => uint) teamFreezed;
 
     // ERC20 standard functions
     function totalSupply() public view returns (uint) {
@@ -218,21 +224,36 @@ contract CasperToken is ERC20Interface, Owned {
     /// after 31.05.2019 100% are unlocked
     function checkTransfer(address from, uint tokens) public view {
         uint newBalance = balances[from].sub(tokens);
+        uint total = 0;
         if (now < unlockDate5) {
             require(now >= unlockDate1);
+            uint frzdPercent = 0;
             if (now < unlockDate2) {
-                // 20% of tokens are unlocked
-                require(newBalance >= freezed[from].mul(80).div(100));
+                frzdPercent = 80;
             } else if (now < unlockDate3) {
-                // 40% of tokens are unlocked
-                require(newBalance >= freezed[from].mul(60).div(100));
+                frzdPercent = 60;
             } else if (now < unlockDate4) {
-                // 60% of tokens are unlocked
-                require(newBalance >= freezed[from].mul(40).div(100));
+                frzdPercent = 40;
             } else {
-                // 80% of tokens are unlocked
-                require(newBalance >= freezed[from].mul(20).div(100));
+                frzdPercent = 20;
             }
+            total = freezed[from].mul(frzdPercent).div(100);
+            require(newBalance >= total);
+        }
+        
+        if (now < teamUnlock4 && teamFreezed[from] >= 0) {
+            uint p = 0;
+            if (now < teamUnlock1) {
+                p = 100;
+            } else if (now < teamUnlock2) {
+                p = 75;
+            } else if (now < teamUnlock3) {
+                p = 50;
+            } else if (now < teamUnlock4) {
+                p = 25;
+            }
+            total = total.add(teamFreezed[from].mul(p).div(100));
+            require(newBalance >= total);
         }
     }
 
@@ -363,6 +384,13 @@ contract CasperToken is ERC20Interface, Owned {
         freezed[_to] = freezed[_to].add(cst);
     }
 
+    /// @notice _freezeTranfer perform actual tokens transfer which
+    /// will be freezed (see also checkTransfer() )
+    function _teamTransfer(address _to, uint cst) private {
+        _transfer(owner, _to, cst);
+        teamFreezed[_to] = teamFreezed[_to].add(cst);
+    }
+
     address public constant wuguAddr = 0x096ad02a48338CB9eA967a96062842891D195Af5;
     address public constant richardAddr = 0x411fB4D77EDc659e9838C21be72f55CC304C0cB8;
     mapping(address => address[]) promoterClients;
@@ -491,11 +519,11 @@ contract CasperToken is ERC20Interface, Owned {
         team = team.mul(15).div(100);
 
         uint ownerETH = 0;
-        if (this.balance >= team) {
+        if (address(this).balance >= team) {
             teamETH = team;
-            ownerETH = this.balance.sub(teamETH);
+            ownerETH = address(this).balance.sub(teamETH);
         } else {
-            teamETH = this.balance;
+            teamETH = address(this).balance;
         }
 
         // TODO multisig
