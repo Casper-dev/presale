@@ -183,7 +183,7 @@ contract CasperToken is ERC20Interface, Owned {
 
     // ERC20 standard functions
     function totalSupply() public view returns (uint) {
-        return _totalSupply - balances[owner];
+        return _totalSupply;
     }
     function balanceOf(address tokenOwner) public view returns (uint balance) {
         return balances[tokenOwner];
@@ -281,6 +281,7 @@ contract CasperToken is ERC20Interface, Owned {
 
     bool icoClosed = false;
     function closeICO() public onlyOwner {
+        require(!icoClosed);
         icoClosed = checkICOStatus();
     }
 
@@ -296,6 +297,7 @@ contract CasperToken is ERC20Interface, Owned {
 
         uint cst = _usd.mul(100).mul(cstToMicro).div(12); // presale tariff
         presaleSold = presaleSold.add(cst);
+        require(presaleSold <= presaleSupply);
         ethSold = ethSold.add(_usd.mul(10**8).div(ethRate));
 
         _freezeTransfer(_to, cst);
@@ -336,7 +338,7 @@ contract CasperToken is ERC20Interface, Owned {
 
     /// @notice _sellPresale checks CST purchases during crowdsale
     function _sellPresale(uint cst) private {
-        require(cst >= bonusLevel0.mul(9997).div(10000));
+        require(cst >= bonusLevel0.mul(9950).div(10000));
         presaleSold = presaleSold.add(cst);
         require(presaleSold <= presaleSupply);
     }
@@ -344,14 +346,21 @@ contract CasperToken is ERC20Interface, Owned {
     /// @notice _sellCrowd checks CST purchases during crowdsale
     function _sellCrowd(uint cst, address _to) private {
         require(cst >= crowdsaleMinUSD);
-        crowdsaleSold = crowdsaleSold.add(cst);
-        require(crowdsaleSold <= crowdsaleSupply.add(presaleSupply).sub(presaleSold));
+
+        if (crowdsaleSold.add(cst) <= crowdsaleSupply) {
+            crowdsaleSold = crowdsaleSold.add(cst);
+        } else {
+            presaleSold = presaleSold.add(crowdsaleSold).add(cst).sub(crowdsaleSupply);
+            require(presaleSold <= presaleSupply);
+            crowdsaleSold = crowdsaleSupply;
+        }
+
         if (now < crowdsaleStartTime + 3 days) {
             if (whitemap[_to] >= cst) {
                 whitemap[_to] -= cst;
                 whitelistTokens -= cst;
             } else {
-                require(crowdsaleSupply.add(presaleSupply).sub(presaleSold) >= crowdsaleSold.add(whitelistTokens).add(cst));
+                require(crowdsaleSupply.add(presaleSupply).sub(presaleSold) >= crowdsaleSold.add(whitelistTokens));
             }
         }
     }
@@ -433,6 +442,8 @@ contract CasperToken is ERC20Interface, Owned {
         require(now > crowdsaleEndTime && usd < softcapUSD);
         require(ethSent[_to] > 0);
 
+        delete ethSent[_to];
+
         _to.transfer(ethSent[_to]);
     }
 
@@ -467,7 +478,7 @@ contract CasperToken is ERC20Interface, Owned {
             _sellPresale(cst);
 
             /// we have only 2 recognized promoters
-            if (now < crowdsaleStartTime && _ref == wuguAddr || _ref == richardAddr) {
+            if ((now < crowdsaleStartTime || cst >= bonusLevel100) && (_ref == wuguAddr || _ref == richardAddr)) {
                 promoterClients[_ref].push(_to);
                 promoterBonus[_ref][_to] = _wei.mul(5).div(100);
             }
@@ -509,13 +520,13 @@ contract CasperToken is ERC20Interface, Owned {
     /// @notice withdrawFunds is called to send team bonuses after
     /// then end of the ICO
     function withdrawFunds() public onlyOwner {
-        require(icoClosed);
+        require(icoClosed && now >= teamETHUnlock1);
         // TODO for team use all received $ minus $4.8M
         uint eth;
         (,eth,) = ICOStatus();
 
         // pre-ico tokens are not in ethSold
-        uint minus = maxUSD.mul(10**8).div(ethRate);
+        uint minus = bonusTransferred.mul(10**8).div(ethRate);
         uint team = ethSold.sub(minus);
 
         team = team.mul(15).div(100);
