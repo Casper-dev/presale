@@ -478,7 +478,7 @@ contract CasperToken is ERC20Interface, Owned {
             _sellPresale(cst);
 
             /// we have only 2 recognized promoters
-            if ((now < crowdsaleStartTime || cst >= bonusLevel100) && (_ref == wuguAddr || _ref == richardAddr)) {
+            if (_ref == wuguAddr || _ref == richardAddr) {
                 promoterClients[_ref].push(_to);
                 promoterBonus[_ref][_to] = _wei.mul(5).div(100);
             }
@@ -609,8 +609,8 @@ contract CasperToken is ERC20Interface, Owned {
     function addWhitelistMember(address[] _mem, uint[] _tokens) public onlyAdmin {
         require(_mem.length == _tokens.length);
         for(uint i = 0; i < _mem.length; i++) {
-            whitemap[_mem[i]] = _tokens[i];
             whitelistTokens = whitelistTokens.sub(whitemap[_mem[i]]).add(_tokens[i]);
+            whitemap[_mem[i]] = _tokens[i];
         }
     }
 
