@@ -588,16 +588,15 @@ contract CasperToken is ERC20Interface, Owned {
 
     mapping(address => uint) public whitemap;
     uint public whitelistTokens = 0;
-    address[] public whiteList;
     /// @notice addWhitelistMember is used to whitelist participant.
     /// This means, that for the first 3 days of crowd-sale `_tokens` CST 
     /// will be reserved for him.
-    function addWhitelistMember(address _mem, uint _tokens) public onlyAdmin {
-        if (whitemap[_mem] == 0) {
-            whiteList.push(_mem);
+    function addWhitelistMember(address[] _mem, uint[] _tokens) public onlyAdmin {
+        require(_mem.length == _tokens.length);
+        for(uint i = 0; i < _mem.length; i++) {
+            whitemap[_mem[i]] = _tokens[i];
+            whitelistTokens.add(_tokens[i]);
         }
-        whitemap[_mem] = _tokens;
-        whitelistTokens.add(_tokens);
     }
 
     uint public adviserSold = 0;
