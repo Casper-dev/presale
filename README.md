@@ -1,8 +1,10 @@
 # Casper Token Audit
 
+```
 June 2018
 By Coinfabrik
-blog.coinfabrik.com/casper-cst-token-sale-security-audit/
+```
+http://blog.coinfabrik.com/casper-cst-token-sale-security-audit/
 
 - Introduction
 - Summary
