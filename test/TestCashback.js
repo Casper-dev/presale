@@ -1,11 +1,12 @@
 var Casper = artifacts.require('CasperToken')
-var c = require('./common.js')
+var c = require('./lib/common.js')
 
 contract('CasperToken', function (accounts) {
-  const owner = accounts[0]
   const rate = 10 ** 12 // 1 ETH == 10^4 $
 
   it('should return ETH to investor after calling cashBack', async function () {
+    c.revert()
+
     const admin = accounts[1]
     const notOwner = accounts[2]
     const meta = await Casper.new()
