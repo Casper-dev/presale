@@ -54,16 +54,27 @@ async function success (promise) {
 
 module.exports = {
   // Values
-  initSnapshot: snapshot(),
-  presaleStart: Date.parse('10 Jun 2018 00:00:00 GMT') / 1000,
-  presaleEnd:   Date.parse('22 Jul 2018 23:59:59 GMT') / 1000,
-  crowdEnd:     Date.parse('02 Aug 2018 23:59:59 GMT') / 1000,
-  crowdHard:    Date.parse('16 Aug 2018 23:59:59 GMT') / 1000,
-  unlock1:      Date.parse('28 Sep 2018 23:59:59 GMT') / 1000,
-  unlock2:      Date.parse('30 Nov 2018 23:59:59 GMT') / 1000,
-  unlock3:      Date.parse('31 Jan 2019 23:59:59 GMT') / 1000,
-  unlock4:      Date.parse('29 Mar 2019 23:59:59 GMT') / 1000,
-  unlock5:      Date.parse('31 May 2019 23:59:59 GMT') / 1000,
+  initSnapshot: 1,
+  
+  presaleStart:   Date.parse('10 Jun 2018 00:00:00 GMT') / 1000,
+  presaleEnd:     Date.parse('22 Jul 2018 23:59:59 GMT') / 1000,
+  crowdEnd:       Date.parse('02 Aug 2018 23:59:59 GMT') / 1000,
+  crowdHard:      Date.parse('16 Aug 2018 23:59:59 GMT') / 1000,
+
+  unlock1:        Date.parse('28 Sep 2018 23:59:59 GMT') / 1000,
+  unlock2:        Date.parse('30 Nov 2018 23:59:59 GMT') / 1000,
+  unlock3:        Date.parse('31 Jan 2019 23:59:59 GMT') / 1000,
+  unlock4:        Date.parse('29 Mar 2019 23:59:59 GMT') / 1000,
+  unlock5:        Date.parse('31 May 2019 23:59:59 GMT') / 1000,
+
+  teamETHunlock1: Date.parse('02 Sep 2018 00:00:00 GMT') / 1000,
+  teamETHunlock2: Date.parse('02 Oct 2018 00:00:00 GMT') / 1000,
+  teamETHunlock3: Date.parse('02 Nov 2018 00:00:00 GMT') / 1000,
+
+  teamUnlock1:    Date.parse('02 Feb 2019 00:00:00 GMT') / 1000,
+  teamUnlock2:    Date.parse('02 Aug 2019 00:00:00 GMT') / 1000,
+  teamUnlock3:    Date.parse('02 Feb 2020 00:00:00 GMT') / 1000,
+  teamUnlock4:    Date.parse('02 Aug 2020 00:00:00 GMT') / 1000,
 
   // Functions
   snapshot,

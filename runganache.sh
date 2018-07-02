@@ -53,4 +53,5 @@ ganache-cli -p 7545 --hostname 0.0.0.0 \
     --account=0xf11f7b21f9c01fc8f2fc8aedc4a225c7161ae66c249ddb6eb1c93faa27297adb,$ether \
     --account=0x8e8d56c91a042a658bbf93e36c6fd8f8015ecc3c6ce06dfdd34cff28fd9f352a,$ether \
     --account=0x82e1d9635b1749ad72c5751dfd89bbf82db31650f03c7427e22db19aa3c1d708,$ether \
-    --account=0x101e95f9ef90e52adf32930908f01f53d34b1e04c9707d765de77760942d0441,$ether
+    --account=0x101e95f9ef90e52adf32930908f01f53d34b1e04c9707d765de77760942d0441,$ether \
+    --unlock=0x041A1e96E0C9d3957613071c104E44a9c9d43996 

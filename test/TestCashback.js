@@ -38,8 +38,9 @@ contract('CasperToken', function (accounts) {
     gasCost += c.gasCostWei(resp.tx)
 
     // Random investor expects his eth has been returned to his wallet
-    var newBalance = web3.eth.getBalance(notOwner)
-    var ok = newBalance == balance - gasCost
-    assert(ok, 'ETH should be returned to investor after cashback')
+    var actualBalance = web3.eth.getBalance(notOwner)
+    var expectedBalance = balance - gasCost
+    var ok = newBalance == expectedBalance
+    assert(ok, `expected: ${expectedBalance} got: ${actualBalance}`)
   })
 })

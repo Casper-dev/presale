@@ -4,7 +4,7 @@ var c = require('./lib/common.js')
 contract('CasperToken', function (accounts) {
   const rate = 10 ** 12 // 1 ETH == 10^4 $
 
-  it('Purchasing should be forbidden for users without KYC mark', async function () {
+  it('should not allow users without KYC mark buy tokens', async function () {
     c.revert()
 
     const admin = accounts[1]
