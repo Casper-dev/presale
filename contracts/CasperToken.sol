@@ -442,9 +442,9 @@ contract CasperToken is ERC20Interface, Owned {
         require(now > crowdsaleEndTime && usd < softcapUSD);
         require(ethSent[_to] > 0);
 
-        delete ethSent[_to];
-
         _to.transfer(ethSent[_to]);
+
+        delete ethSent[_to];
     }
 
     /// @notice stores amount of ETH received by SC
