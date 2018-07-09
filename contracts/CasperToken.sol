@@ -7,7 +7,7 @@ import {Owned} from "./Owned.sol";
 contract CasperToken is ERC20Interface, Owned {
     using SafeMath for uint;
 
-    string public constant name = "Csper Token";
+    string public constant name = "Casper Token";
     string public constant symbol = "CST";
     uint8 public constant decimals = 18;
 
