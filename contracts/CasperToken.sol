@@ -33,7 +33,7 @@ contract CasperToken is ERC20Interface, Owned {
     uint public investorGiven = 0;
 
     // Amount of ETH received during ICO
-    uint public ethSold = 0;
+    uint public weiSold = 0;
 
     uint constant public softcapUSD = 4500000;
     uint constant public preicoUSD  = 1040000;
@@ -264,7 +264,7 @@ contract CasperToken is ERC20Interface, Owned {
         usd = presaleSold.mul(12).div(10**20) + crowdsaleSold.mul(16).div(10**20);
         usd = usd.add(preicoUSD); // pre-ico tokens
 
-        return (usd, ethSold + preicoUSD.mul(10**8).div(ethRate), presaleSold + crowdsaleSold);
+        return (usd, weiSold + preicoUSD.mul(10**8).div(ethRate), presaleSold + crowdsaleSold);
     }
 
     function checkICOStatus() public view returns(bool) {
@@ -298,7 +298,7 @@ contract CasperToken is ERC20Interface, Owned {
         uint cst = _usd.mul(100).mul(cstToMicro).div(12); // presale tariff
         presaleSold = presaleSold.add(cst);
         require(presaleSold <= presaleSupply);
-        ethSold = ethSold.add(_usd.mul(10**8).div(ethRate));
+        weiSold = weiSold.add(_usd.mul(10**8).div(ethRate));
 
         _freezeTransfer(_to, cst);
     }
@@ -465,7 +465,7 @@ contract CasperToken is ERC20Interface, Owned {
         uint cst;
 
         ethSent[msg.sender] = ethSent[msg.sender].add(_wei);
-        ethSold = ethSold.add(_wei);
+        weiSold = weiSold.add(_wei);
 
         // accept payment on presale only if it is more than 9997$
         // actual check is performed in _sellPresale
@@ -497,7 +497,7 @@ contract CasperToken is ERC20Interface, Owned {
 
         require(!icoClosed);
 
-        ethSold = ethSold.add(_wei);
+        weiSold = weiSold.add(_wei);
 
         uint cst;
         // accept payment on presale only if it is more than 9997$
@@ -529,9 +529,9 @@ contract CasperToken is ERC20Interface, Owned {
         uint eth;
         (,eth,) = ICOStatus();
 
-        // pre-ico tokens are not in ethSold
+        // pre-ico tokens are not in weiSold
         uint minus = bonusTransferred.mul(10**8).div(ethRate);
-        uint team = ethSold.sub(minus);
+        uint team = weiSold.sub(minus);
 
         team = team.mul(15).div(100);
 
